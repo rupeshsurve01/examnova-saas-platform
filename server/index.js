@@ -3,6 +3,7 @@ const dotenv = require("dotenv"); // This loads all variables from .env file int
 const cors = require("cors");
 const connectDB = require("./config/db")
 const authRoutes = require("./routes/authRoutes");
+const examRoutes = require("./routes/examRoutes")
 
 dotenv.config();
 connectDB()
@@ -13,6 +14,7 @@ const app = express();
 app.use(express.json()); //1.Allows server to read JSON data from request body 2.Used in POST/PUT requests
 app.use(cors()); // Cross-Origin Resource Sharing
 app.use("/api/auth", authRoutes);
+app.use("/api/exam", examRoutes)
 
 // Test Route
 app.get("/", (req, res) => {
