@@ -11,6 +11,7 @@ router.get("/:examId/questions", getExamQuestions)
 router.post("/:examId/submit", attemptedQuestions)
 router.get("/:examId/result/:studentId", getStudentResult)
 router.get("/:examId/attempts", getExamAttempts);
+router.patch("/:examId/publish", publishExam)
 
 module.exports = router
  
