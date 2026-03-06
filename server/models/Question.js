@@ -16,7 +16,8 @@ const QuestionSchema = new mongoose.Schema(
 
     options: {
         type: [String],
-        required: true
+        required: true,
+         validate: [arr => arr.length >= 2, "At least two options required"]
     },
 
     correctAnswer: {

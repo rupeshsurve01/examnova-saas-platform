@@ -1,4 +1,5 @@
 const Attempt = require("../models/Attempt");
+const Question = require("../models/Question");
 
 const attemptedQuestions = async (req, res) => {
   try {
@@ -10,27 +11,64 @@ const attemptedQuestions = async (req, res) => {
     }
 
     const existingAttempt = await Attempt.findOne({ examId, studentId });
-
     if (existingAttempt) {
-      return res
-        .status(400)
-        .json({ message: "You have already attempted this exam" });
+      return res.status(400).json({ message: "You already attempted this exam" });
     }
+
+    const questions = await Question.find({ examId }).select("correctAnswer marks");
+
+    let score = 0;
+
+    answers.forEach((answer) => {
+      const question = questions.find(
+        (q) => q._id.toString() === answer.questionId
+      );
+
+      if (question && question.correctAnswer === answer.selectedOption) {
+        score += question.marks;
+      }
+    });
 
     const attempt = await Attempt.create({
       examId,
       studentId,
       answers,
+      score,
     });
 
     res.status(201).json({
       message: "Exam submitted successfully",
+      score,
       attempt,
     });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
   }
 };
 
-module.exports = { attemptedQuestions };
+
+const getStudentResult = async (req, res) => {
+  try {
+    const { examId, studentId } = req.params;
+
+    if (!examId || !studentId) {
+      return res.status(400).json({ message: "Exam or Student ID required" });
+    }
+
+    const result = await Attempt.findOne({ examId, studentId });
+
+    if (!result) {
+      return res.status(404).json({ message: "Result not found" });
+    }
+
+    res.status(200).json(result);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+module.exports = { attemptedQuestions, getStudentResult };
