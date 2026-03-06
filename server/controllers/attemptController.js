@@ -12,16 +12,20 @@ const attemptedQuestions = async (req, res) => {
 
     const existingAttempt = await Attempt.findOne({ examId, studentId });
     if (existingAttempt) {
-      return res.status(400).json({ message: "You already attempted this exam" });
+      return res
+        .status(400)
+        .json({ message: "You already attempted this exam" });
     }
 
-    const questions = await Question.find({ examId }).select("correctAnswer marks");
+    const questions = await Question.find({ examId }).select(
+      "correctAnswer marks",
+    );
 
     let score = 0;
 
     answers.forEach((answer) => {
       const question = questions.find(
-        (q) => q._id.toString() === answer.questionId
+        (q) => q._id.toString() === answer.questionId,
       );
 
       if (question && question.correctAnswer === answer.selectedOption) {
@@ -41,13 +45,11 @@ const attemptedQuestions = async (req, res) => {
       score,
       attempt,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
   }
 };
-
 
 const getStudentResult = async (req, res) => {
   try {
@@ -64,6 +66,27 @@ const getStudentResult = async (req, res) => {
     }
 
     res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const getExamAttempts = async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    if (!examId) {
+      return res.status(400).json({ message: "Exam Id Required" });
+    }
+
+    const attempts = await Attempt.find({ examId }).populate("studentId");
+
+    if (attempts.length === 0) {
+      return res.status(404).json({ message: "No attempts found for this exam" });
+    }
+
+    res.status(200).json(attempts);
 
   } catch (error) {
     console.error(error);
@@ -71,4 +94,8 @@ const getStudentResult = async (req, res) => {
   }
 };
 
-module.exports = { attemptedQuestions, getStudentResult };
+module.exports = {
+  attemptedQuestions,
+  getStudentResult,
+  getExamAttempts
+};
