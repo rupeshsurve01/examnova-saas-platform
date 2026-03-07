@@ -118,9 +118,44 @@ const getStudentAttempts = async (req, res) => {
   }
 };
 
+const startExam = async (req, res) => {
+  try {
+
+    const { examId } = req.params;
+    const { studentId } = req.body;
+
+    if (!examId || !studentId) {
+      return res.status(400).json({ message: "ExamId and studentId required" });
+    }
+
+    const existingAttempt = await Attempt.findOne({ examId, studentId });
+
+    if (existingAttempt) {
+      return res.status(400).json({ message: "Exam already started" });
+    }
+
+    const attempt = await Attempt.create({
+      examId,
+      studentId,
+      startedAt: new Date()
+    });
+
+    res.status(201).json({
+      message: "Exam started",
+      attempt
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
 module.exports = {
   attemptedQuestions,
   getStudentResult,
   getExamAttempts,
-  getStudentAttempts
+  getStudentAttempts,
+  startExam
 };
