@@ -94,8 +94,33 @@ const getExamAttempts = async (req, res) => {
   }
 };
 
+const getStudentAttempts = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    if (!studentId) {
+      return res.status(400).json({ message: "Student ID required" });
+    }
+
+    const attempts = await Attempt
+      .find({ studentId })
+      .populate("examId", "title examCode duration");
+
+    if (attempts.length === 0) {
+      return res.status(404).json({ message: "No attempts found" });
+    }
+
+    res.status(200).json(attempts);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   attemptedQuestions,
   getStudentResult,
-  getExamAttempts
+  getExamAttempts,
+  getStudentAttempts
 };

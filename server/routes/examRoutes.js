@@ -1,5 +1,5 @@
 const express = require('express')
-const { createExam } = require("../controllers/examController")
+const { createExam, publishExam } = require("../controllers/examController")
 const { addQuestions, getExamQuestions } =  require("../controllers/questionController")
 const { attemptedQuestions, getStudentResult, getExamAttempts } = require('../controllers/attemptController')
 
