@@ -127,4 +127,39 @@ const submitExam = async (req, res) => {
   }
 };
 
-module.exports = { createExam, publishExam, submitExam };
+const getAvailableExams = async (req, res) => {
+  try {
+    const exams = await Exam.find({ isPublished: true })
+      .select("title description duration totalMarks examCode");
+
+    res.status(200).json(exams);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const getCreatedExam = async (req, res) => {
+  try {
+
+    const teacherId = req.params.teacherId;
+
+    if (!teacherId) {
+      return res.status(400).json({ message: "Teacher Id Required" });
+    }
+
+    const exams = await Exam.find({ createdBy: teacherId });
+
+    if (!exams || exams.length === 0) {
+      return res.status(404).json({ message: "Exams Not Found" });
+    }
+
+    res.status(200).json(exams);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+module.exports = { createExam, publishExam, submitExam, getAvailableExams, getCreatedExam };
