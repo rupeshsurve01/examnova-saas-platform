@@ -4,11 +4,11 @@ import Login from './pages/Login'
 
 const App = () => {
   return (
-    <div>
+    <div className=''>
       <Register />
       <Login />
     </div>
   )
 }
 
-export default App
+export default App;
