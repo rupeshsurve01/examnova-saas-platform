@@ -15,7 +15,7 @@ const app = express();
 app.use(express.json()); //1.Allows server to read JSON data from request body 2.Used in POST/PUT requests
 app.use(cors()); // Cross-Origin Resource Sharing
 app.use("/api/auth", authRoutes);
-app.use("/api/exam", examRoutes)
+app.use("/api/exams", examRoutes)
 app.use("/api/student", attemptRoutes)
 
 // Test Route
