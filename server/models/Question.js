@@ -22,7 +22,8 @@ const QuestionSchema = new mongoose.Schema(
 
     correctAnswer: {
         type: Number,
-        required: true
+        required: true,
+          min: 0
     },
 
     marks: {

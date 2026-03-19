@@ -1,4 +1,5 @@
 const Question = require("../models/Question");
+const Exam = require("../models/Exam"); 
 
 const addQuestions = async (req, res) => {
   try {

@@ -22,18 +22,17 @@ const createExam = async (req, res) => {
       totalMarks,
       duration,
       examCode,
-      createdBy: req.body.createdBy // temporary until JWT auth added
+      createdBy: req.body.createdBy, // temporary until JWT auth added
     });
 
     res.status(201).json({
       message: "Exam created successfully",
-      exam
+      exam,
     });
-
   } catch (error) {
-  console.error(error);
-  res.status(500).json({ message: error.message });
-}
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
 };
 
 const publishExam = async (req, res) => {
@@ -55,19 +54,16 @@ const publishExam = async (req, res) => {
 
     res.status(200).json({
       message: "Exam published successfully",
-      exam
+      exam,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
   }
 };
 
-
 const submitExam = async (req, res) => {
   try {
-
     const { examId } = req.params;
     const { studentId, answers } = req.body;
 
@@ -76,6 +72,11 @@ const submitExam = async (req, res) => {
     }
 
     const exam = await Exam.findById(examId);
+
+    if (!exam || !exam.isPublished) {
+      return res.status(403).json({ message: "Exam not available" });
+    }
+
     if (!exam) {
       return res.status(404).json({ message: "Exam not found" });
     }
@@ -93,7 +94,7 @@ const submitExam = async (req, res) => {
 
     if (elapsedMinutes > exam.duration) {
       return res.status(403).json({
-        message: "Exam time exceeded"
+        message: "Exam time exceeded",
       });
     }
 
@@ -103,7 +104,7 @@ const submitExam = async (req, res) => {
 
     answers.forEach((answer) => {
       const question = questions.find(
-        (q) => q._id.toString() === answer.questionId
+        (q) => q._id.toString() === answer.questionId,
       );
 
       if (question && question.correctAnswer === answer.selectedOption) {
@@ -118,9 +119,8 @@ const submitExam = async (req, res) => {
 
     res.status(200).json({
       message: "Exam submitted successfully",
-      score
+      score,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -129,8 +129,9 @@ const submitExam = async (req, res) => {
 
 const getAvailableExams = async (req, res) => {
   try {
-    const exams = await Exam.find({ isPublished: true })
-      .select("title description duration totalMarks examCode");
+    const exams = await Exam.find({ isPublished: true }).select(
+      "title description duration totalMarks examCode",
+    );
 
     res.status(200).json(exams);
   } catch (error) {
@@ -141,7 +142,6 @@ const getAvailableExams = async (req, res) => {
 
 const getCreatedExam = async (req, res) => {
   try {
-
     const teacherId = req.params.teacherId;
 
     if (!teacherId) {
@@ -155,11 +155,16 @@ const getCreatedExam = async (req, res) => {
     }
 
     res.status(200).json(exams);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
   }
 };
 
-module.exports = { createExam, publishExam, submitExam, getAvailableExams, getCreatedExam };
+module.exports = {
+  createExam,
+  publishExam,
+  submitExam,
+  getAvailableExams,
+  getCreatedExam,
+};

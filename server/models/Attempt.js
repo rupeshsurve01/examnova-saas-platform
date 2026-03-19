@@ -38,6 +38,9 @@ const AttemptSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    submittedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

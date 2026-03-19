@@ -41,10 +41,14 @@ const ExamSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+
+    startTime: {
+      type: Date,
+    },
   },
   {
     timestamps: true, // automatically creates createdAt and updatedAt
-  }
+  },
 );
 
 module.exports = mongoose.model("Exam", ExamSchema);
