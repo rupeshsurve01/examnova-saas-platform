@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 import API from "../services/api";
 
 function ResultPage() {
-  const { attemptId } = useParams();
+
+  const { examId, studentId } = useParams();
   const [result, setResult] = useState(null);
 
   useEffect(() => {
@@ -12,37 +13,37 @@ function ResultPage() {
 
   const fetchResult = async () => {
     try {
-      const res = await API.get(`/attempts/${attemptId}`);
+
+      const res = await API.get(`/exams/${examId}/result/${studentId}`);
+
       setResult(res.data);
+
     } catch (err) {
       console.log(err);
     }
   };
 
   if (!result)
-    return <h2 className="text-center mt-20 text-xl">Loading...</h2>;
+    return (
+      <h2 className="text-center mt-20 text-xl">
+        Loading Result...
+      </h2>
+    );
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
 
       <div className="bg-white shadow-lg rounded-xl p-10 text-center w-96">
 
-        <h1 className="text-2xl font-bold mb-6">Exam Result</h1>
+        <h1 className="text-2xl font-bold mb-6">
+          Exam Result
+        </h1>
 
         <div className="space-y-3 text-lg">
 
           <p>
-            <span className="font-semibold">Score:</span> {result.score}
-          </p>
-
-          <p>
-            <span className="font-semibold">Total Questions:</span>{" "}
-            {result.totalQuestions}
-          </p>
-
-          <p>
-            <span className="font-semibold">Correct Answers:</span>{" "}
-            {result.correctAnswers}
+            <span className="font-semibold">Score:</span>{" "}
+            {result.score}
           </p>
 
         </div>

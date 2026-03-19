@@ -4,6 +4,7 @@ import API from "../services/api";
 import QuestionCard from "../components/QuestionCard";
 
 function ExamPage() {
+
   const { examId } = useParams();
   const navigate = useNavigate();
 
@@ -17,27 +18,37 @@ function ExamPage() {
   const fetchQuestions = async () => {
     try {
       const res = await API.get(`/exams/${examId}/questions`);
-      setQuestions(res.data);
+      setQuestions(res.data.questions);
     } catch (err) {
       console.log(err);
     }
   };
 
-  const handleAnswer = (questionId, option) => {
+  const handleAnswer = (questionId, optionIndex) => {
     setAnswers({
       ...answers,
-      [questionId]: option,
+      [questionId]: optionIndex
     });
   };
 
   const submitExam = async () => {
+
     try {
-      const res = await API.post("/attempts/submit", {
-        examId,
-        answers,
+
+      const formattedAnswers = Object.keys(answers).map((questionId) => ({
+        questionId,
+        selectedOption: answers[questionId]
+      }));
+
+      const studentId = localStorage.getItem("userId");
+
+      const res = await API.post(`/exams/${examId}/submit`, {
+        studentId,
+        answers: formattedAnswers
       });
 
-      navigate(`/result/${res.data.attemptId}`);
+      navigate(`/result/${examId}/${studentId}`);
+
     } catch (err) {
       console.log(err);
     }
@@ -48,7 +59,9 @@ function ExamPage() {
 
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-8">
 
-        <h1 className="text-2xl font-bold mb-6 text-center">Exam</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          Exam
+        </h1>
 
         {questions.map((q, index) => (
           <QuestionCard
