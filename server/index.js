@@ -5,6 +5,7 @@ const connectDB = require("./config/db")
 const authRoutes = require("./routes/authRoutes");
 const examRoutes = require("./routes/examRoutes")
 const attemptRoutes = require("./routes/attemptRoutes")
+const orgRoutes = require("./routes/organizationRoutes");
 
 dotenv.config();
 connectDB()
@@ -17,6 +18,7 @@ app.use(cors()); // Cross-Origin Resource Sharing
 app.use("/api/auth", authRoutes);
 app.use("/api/exams", examRoutes)
 app.use("/api/student", attemptRoutes)
+app.use("/api/org", orgRoutes);
 
 // Test Route
 app.get("/", (req, res) => {

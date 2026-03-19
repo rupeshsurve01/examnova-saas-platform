@@ -42,6 +42,12 @@ const ExamSchema = new mongoose.Schema(
       trim: true,
     },
 
+    organizationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+
     startTime: {
       type: Date,
     },
