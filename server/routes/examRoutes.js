@@ -21,24 +21,28 @@ const {
 
 const router = express.Router();
 
+const protect = require("../middleware/authMiddleware");
+const authorize = require("../middleware/roleMiddleware");
+
+
 // ---------- LIST ROUTES FIRST ----------
-router.get("/", getAvailableExams);
-router.get("/teacher/:teacherId", getCreatedExam);
+router.get("/", protect, getAvailableExams);
+router.get("/teacher/:teacherId", protect, authorize("teacher", "org_admin"), getCreatedExam);
 
 // ---------- CREATE ----------
-router.post("/create", createExam);
+router.post("/create", protect, authorize("teacher", "org_admin"), createExam);
 
 // ---------- EXAM ACTIONS ----------
-router.patch("/:examId/publish", publishExam);
-router.post("/:examId/start", startExam);
-router.post("/:examId/submit", submitExam);
+router.patch("/:examId/publish", protect, authorize("teacher", "org_admin"), publishExam);
+router.post("/:examId/start", protect, authorize("student"), startExam);
+router.post("/:examId/submit", protect, authorize("student"), submitExam);
 
 // ---------- QUESTIONS ----------
-router.post("/:examId/questions", addQuestions);
-router.get("/:examId/questions", getExamQuestions);
+router.post("/:examId/questions", protect, authorize("teacher", "org_admin"), addQuestions);
+router.get("/:examId/questions", protect, authorize("student", "teacher", "org_admin"), getExamQuestions);
 
 // ---------- RESULTS ----------
-router.get("/:examId/result/:studentId", getStudentResult);
-router.get("/:examId/attempts", getExamAttempts);
+router.get("/:examId/result/:studentId", protect, getStudentResult);
+router.get("/:examId/attempts", protect, authorize("teacher", "org_admin"), getExamAttempts);
 
 module.exports = router;

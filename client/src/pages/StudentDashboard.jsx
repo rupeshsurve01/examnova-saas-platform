@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function StudentDashboard() {
   const [exams, setExams] = useState([]);
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const { user, logout } = useAuth();
 
   const startExam = async (examId) => {
     try {
-      const studentId = localStorage.getItem("userId");
-
-      if (!studentId) {
+      if (!user?.id) {
         alert("Please login again to start the exam.");
+        logout();
         navigate("/");
         return;
       }
 
-      await API.post(`/exams/${examId}/start`, { studentId });
+      await API.post(`/exams/${examId}/start`);
       navigate(`/exam/${examId}`);
     } catch (error) {
       const message =
@@ -53,8 +53,19 @@ function StudentDashboard() {
             <div className="brand">ExamNova</div>
             <p className="text-sm text-[var(--muted)]">Student dashboard</p>
           </div>
-          <div className="text-sm text-[var(--muted)]">
-            {user?.name ? `Logged in as ${user.name}` : "Logged in"}
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-[var(--muted)]">
+              {user?.name ? `Logged in as ${user.name}` : "Logged in"}
+            </div>
+            <button
+              onClick={() => {
+                logout();
+                navigate("/");
+              }}
+              className="secondary-button"
+            >
+              Logout
+            </button>
           </div>
         </header>
 

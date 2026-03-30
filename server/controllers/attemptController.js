@@ -5,12 +5,13 @@ const Exam = require("../models/Exam");
 const getStudentResult = async (req, res) => {
   try {
     const { examId, studentId } = req.params;
+    const requestedStudentId = req.user.role === "student" ? req.user._id.toString() : studentId;
 
     if (!examId || !studentId) {
       return res.status(400).json({ message: "Exam or Student ID required" });
     }
 
-    const result = await Attempt.findOne({ examId, studentId });
+    const result = await Attempt.findOne({ examId, studentId: requestedStudentId });
 
     if (!result) {
       return res.status(404).json({ message: "Result not found" });
@@ -47,7 +48,9 @@ const getExamAttempts = async (req, res) => {
 
 const getStudentAttempts = async (req, res) => {
   try {
-    const { studentId } = req.params;
+    const studentId = req.user.role === "student"
+      ? req.user._id
+      : req.params.studentId;
 
     if (!studentId) {
       return res.status(400).json({ message: "Student ID required" });
@@ -73,7 +76,7 @@ const startExam = async (req, res) => {
   try {
 
     const { examId } = req.params;
-    const { studentId } = req.body;
+const studentId = req.user._id;
 
     if (!examId || !studentId) {
       return res.status(400).json({ message: "ExamId and studentId required" });

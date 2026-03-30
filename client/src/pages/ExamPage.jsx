@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../services/api";
 import QuestionCard from "../components/QuestionCard";
+import { useAuth } from "../context/AuthContext";
 
 function ExamPage() {
   const { examId } = useParams();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
@@ -32,10 +34,9 @@ function ExamPage() {
 
   const submitExam = async () => {
     try {
-      const studentId = localStorage.getItem("userId");
-
-      if (!studentId) {
+      if (!user?.id) {
         alert("Please login again to submit the exam.");
+        logout();
         navigate("/");
         return;
       }
@@ -46,11 +47,10 @@ function ExamPage() {
       }));
 
       await API.post(`/exams/${examId}/submit`, {
-        studentId,
         answers: formattedAnswers,
       });
 
-      navigate(`/result/${examId}/${studentId}`);
+      navigate(`/result/${examId}/${user.id}`);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to submit exam");
     }

@@ -1,25 +1,30 @@
 import { useState } from "react";
 import API from "../services/api";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const res = await API.post("/auth/login", { email, password });
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      localStorage.setItem("userId", res.data.user.id);
+      login({ user: res.data.user, token: res.data.token });
       alert("Login Successful");
       navigate("/dashboard");
     } catch (error) {
       alert(error.response?.data?.message || "Login failed");
     }
   };
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="auth-layout">
@@ -84,7 +89,10 @@ function Login() {
 
           <p className="mt-6 text-sm text-[var(--muted)]">
             Don&apos;t have an account?{" "}
-            <Link to="/register" className="font-semibold text-[var(--primary)]">
+            <Link
+              to="/register"
+              className="font-semibold text-[var(--primary)]"
+            >
               Register here
             </Link>
           </p>

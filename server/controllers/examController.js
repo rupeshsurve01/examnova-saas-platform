@@ -10,17 +10,17 @@ const createExam = async (req, res) => {
       totalMarks,
       duration,
       examCode,
-      createdBy,
       organizationId,
     } = req.body;
+    const createdBy = req.user._id;
+    const orgIdFromUser = req.user.organizationId || null;
 
     if (
       !title ||
       !description ||
       !totalMarks ||
       !duration ||
-      !examCode ||
-      !createdBy
+      !examCode
     ) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -37,8 +37,8 @@ const createExam = async (req, res) => {
       totalMarks,
       duration,
       examCode,
-      createdBy, // temporary until JWT auth added
-      organizationId,
+      createdBy,
+      organizationId: orgIdFromUser || organizationId || undefined,
     });
 
     res.status(201).json({
@@ -81,9 +81,10 @@ const publishExam = async (req, res) => {
 const submitExam = async (req, res) => {
   try {
     const { examId } = req.params;
-    const { studentId, answers } = req.body;
+    const { answers } = req.body;
+    const studentId = req.user._id;
 
-    if (!examId || !studentId || !answers) {
+    if (!examId || !answers) {
       return res.status(400).json({ message: "All fields required" });
     }
 

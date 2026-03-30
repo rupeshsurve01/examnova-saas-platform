@@ -1,6 +1,7 @@
 import { useState } from "react";
 import API from "../services/api";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Register() {
   const [form, setForm] = useState({
@@ -11,6 +12,7 @@ function Register() {
   });
 
   const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuth();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -20,13 +22,18 @@ function Register() {
     e.preventDefault();
 
     try {
-      await API.post("/auth/register", form);
+      const res = await API.post("/auth/register", form);
+      login({ user: res.data.user, token: res.data.token });
       alert("Registration successful");
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       alert(error.response?.data?.message || "Error");
     }
   };
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="auth-layout">
