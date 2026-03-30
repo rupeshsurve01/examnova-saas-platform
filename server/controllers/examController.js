@@ -4,9 +4,24 @@ const Exam = require("../models/Exam");
 
 const createExam = async (req, res) => {
   try {
-    const { title, description, totalMarks, duration, examCode } = req.body;
+    const {
+      title,
+      description,
+      totalMarks,
+      duration,
+      examCode,
+      createdBy,
+      organizationId,
+    } = req.body;
 
-    if (!title || !description || !totalMarks || !duration || !examCode) {
+    if (
+      !title ||
+      !description ||
+      !totalMarks ||
+      !duration ||
+      !examCode ||
+      !createdBy
+    ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -22,7 +37,8 @@ const createExam = async (req, res) => {
       totalMarks,
       duration,
       examCode,
-      createdBy: req.body.createdBy, // temporary until JWT auth added
+      createdBy, // temporary until JWT auth added
+      organizationId,
     });
 
     res.status(201).json({
@@ -73,12 +89,12 @@ const submitExam = async (req, res) => {
 
     const exam = await Exam.findById(examId);
 
-    if (!exam || !exam.isPublished) {
-      return res.status(403).json({ message: "Exam not available" });
-    }
-
     if (!exam) {
       return res.status(404).json({ message: "Exam not found" });
+    }
+
+    if (!exam.isPublished) {
+      return res.status(403).json({ message: "Exam not available" });
     }
 
     const attempt = await Attempt.findOne({ examId, studentId });
@@ -114,6 +130,7 @@ const submitExam = async (req, res) => {
 
     attempt.answers = answers;
     attempt.score = score;
+    attempt.submittedAt = new Date();
 
     await attempt.save();
 

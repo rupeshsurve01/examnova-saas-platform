@@ -1,20 +1,15 @@
 function QuestionCard({ question, index, handleAnswer, selected }) {
   return (
-    <div className="mb-6 border-b pb-6">
+    <div className="question-shell">
+      <p className="question-number">Question {index + 1}</p>
+      <h3 className="section-title mt-2 text-[1.2rem]">{question.questionText}</h3>
 
-      <h3 className="text-lg font-semibold mb-4">
-        {index + 1}. {question.questionText}
-      </h3>
-
-      <div className="space-y-2">
+      <div className="mt-5 space-y-3">
         {question.options.map((option, i) => (
           <label
             key={i}
-            className={`flex items-center gap-2 p-2 border rounded-lg cursor-pointer 
-            ${
-              selected === i
-                ? "bg-blue-100 border-blue-500"
-                : "hover:bg-gray-100"
+            className={`option-card ${
+              selected === i ? "option-card-selected" : ""
             }`}
           >
             <input
@@ -22,9 +17,10 @@ function QuestionCard({ question, index, handleAnswer, selected }) {
               name={question._id}
               checked={selected === i}
               onChange={() => handleAnswer(question._id, i)}
+              className="h-4 w-4 accent-[var(--primary)]"
             />
-
-            {option}
+            <span className="option-badge">{String.fromCharCode(65 + i)}</span>
+            <span>{option}</span>
           </label>
         ))}
       </div>

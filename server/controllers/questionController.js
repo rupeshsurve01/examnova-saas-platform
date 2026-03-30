@@ -52,6 +52,10 @@ const getExamQuestions = async (req, res) => {
 
     const exam = await Exam.findById(examId);
 
+    if (!exam) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
+
     if (!exam.isPublished) {
       return res.status(403).json({ message: "Exam not available yet" });
     }

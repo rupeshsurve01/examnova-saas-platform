@@ -1,6 +1,6 @@
 import { useState } from "react";
 import API from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Register() {
   const [form, setForm] = useState({
@@ -29,58 +29,98 @@ function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100">
+    <div className="auth-layout">
+      <div className="auth-card">
+        <section className="auth-side">
+          <div className="brand">ExamNova</div>
+          <div className="mt-8">
+            <h1 className="page-title">Create Your Exam Account</h1>
+            <p className="page-subtitle mt-3">
+              Register as a student or teacher to access the online examination
+              platform.
+            </p>
+          </div>
 
-      <div className="bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl p-8 w-96 hover:shadow-2xl transition-all">
+          <div className="stats-grid mt-8">
+            <div className="stat-box">
+              <p className="stat-label">Roles</p>
+              <p className="stat-value">2</p>
+            </div>
+            <div className="stat-box">
+              <p className="stat-label">Setup</p>
+              <p className="stat-value">Quick</p>
+            </div>
+            <div className="stat-box">
+              <p className="stat-label">Portal</p>
+              <p className="stat-value">Secure</p>
+            </div>
+          </div>
+        </section>
 
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
-          Register
-        </h2>
+        <section className="auth-form-area">
+          <h2 className="section-title">Register</h2>
+          <p className="section-subtitle">
+            Fill in your details to create a new account.
+          </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="form-grid mt-6">
+            <div>
+              <label className="field-label">Full Name</label>
+              <input
+                name="name"
+                placeholder="Enter your full name"
+                onChange={handleChange}
+                className="form-input"
+              />
+            </div>
 
-          <input
-            name="name"
-            placeholder="Name"
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
-          />
+            <div>
+              <label className="field-label">Email</label>
+              <input
+                name="email"
+                type="email"
+                placeholder="Enter your email"
+                onChange={handleChange}
+                className="form-input"
+              />
+            </div>
 
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
-          />
+            <div>
+              <label className="field-label">Password</label>
+              <input
+                name="password"
+                type="password"
+                placeholder="Create a password"
+                onChange={handleChange}
+                className="form-input"
+              />
+            </div>
 
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
-          />
+            <div>
+              <label className="field-label">Role</label>
+              <select
+                name="role"
+                onChange={handleChange}
+                className="form-input"
+              >
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+              </select>
+            </div>
 
-          <select
-            name="role"
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="student">Student</option>
-            <option value="teacher">Teacher</option>
-          </select>
+            <button type="submit" className="primary-button">
+              Create Account
+            </button>
+          </form>
 
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-2 rounded-lg hover:scale-105 transition duration-300 shadow-lg"
-          >
-            Register
-          </button>
-
-        </form>
+          <p className="mt-6 text-sm text-[var(--muted)]">
+            Already have an account?{" "}
+            <Link to="/" className="font-semibold text-[var(--primary)]">
+              Login here
+            </Link>
+          </p>
+        </section>
       </div>
-
     </div>
   );
 }

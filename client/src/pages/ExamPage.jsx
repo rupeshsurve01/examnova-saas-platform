@@ -4,7 +4,6 @@ import API from "../services/api";
 import QuestionCard from "../components/QuestionCard";
 
 function ExamPage() {
-
   const { examId } = useParams();
   const navigate = useNavigate();
 
@@ -27,63 +26,111 @@ function ExamPage() {
   const handleAnswer = (questionId, optionIndex) => {
     setAnswers({
       ...answers,
-      [questionId]: optionIndex
+      [questionId]: optionIndex,
     });
   };
 
   const submitExam = async () => {
-
     try {
+      const studentId = localStorage.getItem("userId");
+
+      if (!studentId) {
+        alert("Please login again to submit the exam.");
+        navigate("/");
+        return;
+      }
 
       const formattedAnswers = Object.keys(answers).map((questionId) => ({
         questionId,
-        selectedOption: answers[questionId]
+        selectedOption: answers[questionId],
       }));
 
-      const studentId = localStorage.getItem("userId");
-
-      const res = await API.post(`/exams/${examId}/submit`, {
+      await API.post(`/exams/${examId}/submit`, {
         studentId,
-        answers: formattedAnswers
+        answers: formattedAnswers,
       });
 
       navigate(`/result/${examId}/${studentId}`);
-
     } catch (err) {
-      console.log(err);
+      alert(err.response?.data?.message || "Failed to submit exam");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="app-shell">
+      <div className="mx-auto max-w-5xl">
+        <div className="container-card overflow-hidden">
+          <header className="topbar">
+            <div>
+              <div className="brand">ExamNova</div>
+              <p className="text-sm text-[var(--muted)]">Exam interface</p>
+            </div>
+            <div className="text-sm text-[var(--muted)]">
+              Questions answered: {Object.keys(answers).length}/{questions.length}
+            </div>
+          </header>
 
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-8">
+          <section className="page-header">
+            <div>
+              <h1 className="page-title">Online Exam</h1>
+              <p className="page-subtitle">
+                Read each question carefully and select the best answer.
+              </p>
+            </div>
 
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          Exam
-        </h1>
+            <div className="stats-grid">
+              <div className="stat-box">
+                <p className="stat-label">Total Questions</p>
+                <p className="stat-value">{questions.length}</p>
+              </div>
+              <div className="stat-box">
+                <p className="stat-label">Answered</p>
+                <p className="stat-value">{Object.keys(answers).length}</p>
+              </div>
+              <div className="stat-box">
+                <p className="stat-label">Status</p>
+                <p className="stat-value">In Progress</p>
+              </div>
+            </div>
+          </section>
 
-        {questions.map((q, index) => (
-          <QuestionCard
-            key={q._id}
-            question={q}
-            index={index}
-            handleAnswer={handleAnswer}
-            selected={answers[q._id]}
-          />
-        ))}
+          <section className="p-6 pt-0">
+            {questions.length === 0 ? (
+              <div className="panel p-8 text-center">
+                <h2 className="section-title">Loading questions</h2>
+                <p className="section-subtitle">
+                  Please wait while the exam questions are loaded.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {questions.map((q, index) => (
+                  <QuestionCard
+                    key={q._id}
+                    question={q}
+                    index={index}
+                    handleAnswer={handleAnswer}
+                    selected={answers[q._id]}
+                  />
+                ))}
+              </div>
+            )}
 
-        <div className="mt-6 text-center">
-          <button
-            onClick={submitExam}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
-          >
-            Submit Exam
-          </button>
+            <div className="submit-bar mt-6">
+              <div>
+                <h3 className="section-title text-lg">Submit Exam</h3>
+                <p className="section-subtitle">
+                  Make sure your selected answers are correct before submission.
+                </p>
+              </div>
+
+              <button onClick={submitExam} className="primary-button">
+                Submit Exam
+              </button>
+            </div>
+          </section>
         </div>
-
       </div>
-
     </div>
   );
 }

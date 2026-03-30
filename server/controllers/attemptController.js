@@ -1,5 +1,5 @@
 const Attempt = require("../models/Attempt");
-const Question = require("../models/Question");
+const Exam = require("../models/Exam");
 
 
 const getStudentResult = async (req, res) => {
@@ -77,6 +77,16 @@ const startExam = async (req, res) => {
 
     if (!examId || !studentId) {
       return res.status(400).json({ message: "ExamId and studentId required" });
+    }
+
+    const exam = await Exam.findById(examId);
+
+    if (!exam) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
+
+    if (!exam.isPublished) {
+      return res.status(403).json({ message: "Exam not available" });
     }
 
     const existingAttempt = await Attempt.findOne({ examId, studentId });
