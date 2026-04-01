@@ -308,6 +308,104 @@
     font-size: 2rem;
     font-weight: 700;
   }
+
+  .teacher-shell {
+    background:
+      radial-gradient(circle at top right, rgba(14, 165, 233, 0.14), transparent 30%),
+      linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%);
+  }
+
+  .teacher-dashboard-card {
+    border-color: #cbdcf8;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.98));
+  }
+
+  .teacher-hero {
+    gap: 24px;
+    background:
+      radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 30%),
+      linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
+  }
+
+  .teacher-kicker {
+    display: inline-flex;
+    margin-bottom: 12px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .teacher-hero-actions {
+    display: grid;
+    gap: 14px;
+  }
+
+  .teacher-badge-card {
+    border: 1px solid #c7d7fe;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.88);
+    padding: 16px;
+  }
+
+  .teacher-badge-value {
+    margin-top: 8px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e3a8a;
+  }
+
+  .teacher-stat-box {
+    border-color: #c7d7fe;
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(4px);
+  }
+
+  .teacher-empty-state {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 247, 255, 0.98));
+  }
+
+  .teacher-empty-action {
+    margin-top: 20px;
+  }
+
+  .teacher-exam-card {
+    border-color: #cbdcf8;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(246, 249, 255, 1));
+    box-shadow: 0 18px 34px rgba(37, 99, 235, 0.08);
+  }
+
+  .teacher-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .teacher-code-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .teacher-card-actions {
+    display: grid;
+    gap: 12px;
+    margin-top: 24px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -323,6 +421,20 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .teacher-hero {
+    grid-template-columns: 1.2fr 0.8fr;
+    display: grid;
+    align-items: start;
+  }
+
+  .teacher-hero .stats-grid {
+    grid-column: 1 / -1;
+  }
+
+  .teacher-card-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

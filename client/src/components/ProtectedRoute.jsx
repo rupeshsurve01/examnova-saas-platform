@@ -4,6 +4,10 @@ import { useAuth } from "../context/AuthContext";
 function ProtectedRoute({ children, roles }) {
   const { isAuthenticated, user, loading } = useAuth();
   const location = useLocation();
+  const fallbackPath =
+    user?.role === "teacher" || user?.role === "org_admin"
+      ? "/teacher"
+      : "/dashboard";
 
   if (loading) {
     return null;
@@ -14,7 +18,7 @@ function ProtectedRoute({ children, roles }) {
   }
 
   if (roles?.length && !roles.includes(user?.role)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={fallbackPath} replace />;
   }
 
   return children;

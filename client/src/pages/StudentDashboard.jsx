@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function StudentDashboard() {
+  
   const [exams, setExams] = useState([]);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -27,7 +28,6 @@ function StudentDashboard() {
         navigate(`/exam/${examId}`);
         return;
       }
-
       alert(message);
     }
   };

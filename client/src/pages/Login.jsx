@@ -7,7 +7,10 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
+
+  const getDashboardPath = (role) =>
+    role === "teacher" || role === "org_admin" ? "/teacher" : "/dashboard";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,14 +19,14 @@ function Login() {
       const res = await API.post("/auth/login", { email, password });
       login({ user: res.data.user, token: res.data.token });
       alert("Login Successful");
-      navigate("/dashboard");
+      navigate(getDashboardPath(res.data.user?.role));
     } catch (error) {
       alert(error.response?.data?.message || "Login failed");
     }
   };
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={getDashboardPath(user?.role)} replace />;
   }
 
   return (
