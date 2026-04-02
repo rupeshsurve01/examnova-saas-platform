@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import CreateExam from "./pages/createExam";
 import AddQuestions from "./pages/addQuestions";
+import TeacherLayout from "./components/TeacherLayout";
 
 const App = () => {
   return (
@@ -19,30 +20,6 @@ const App = () => {
         element={
           <ProtectedRoute roles={["student"]}>
             <StudentDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/teacher"
-        element={
-          <ProtectedRoute roles={["teacher", "org_admin"]}>
-            <TeacherDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/exams"
-        element={
-          <ProtectedRoute roles={["teacher", "org_admin"]}>
-            <CreateExam />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/add-questions"
-        element={
-          <ProtectedRoute roles={["teacher", "org_admin"]}>
-            <AddQuestions />
           </ProtectedRoute>
         }
       />
@@ -62,6 +39,18 @@ const App = () => {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        element={
+          <ProtectedRoute roles={["teacher", "org_admin"]}>
+            <TeacherLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/teacher" element={<TeacherDashboard />} />
+        <Route path="/exams" element={<CreateExam />} />
+        <Route path="/add-questions" element={<AddQuestions />} />
+      </Route>
     </Routes>
   );
 };

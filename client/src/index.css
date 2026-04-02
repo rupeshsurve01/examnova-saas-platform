@@ -444,3 +444,136 @@
     grid-template-columns: 0.95fr 1.05fr;
   }
 }
+
+
+.teacher-layout {
+  display: grid;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.14), transparent 28%),
+    linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%);
+}
+
+.teacher-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border-right: 1px solid #cbdcf8;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 255, 0.98));
+  padding: 24px 20px;
+}
+
+.teacher-sidebar-header {
+  padding: 4px 8px;
+}
+
+.teacher-sidebar-subtitle {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.teacher-sidebar-profile {
+  border: 1px solid #cbdcf8;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 16px;
+}
+
+.teacher-sidebar-name {
+  margin-top: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.teacher-sidebar-role {
+  margin-top: 4px;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+
+.teacher-sidebar-nav {
+  display: grid;
+  gap: 10px;
+}
+
+.teacher-nav-link {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--text);
+  font-weight: 600;
+  padding: 12px 14px;
+  text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.teacher-nav-link:hover {
+  background: #eff6ff;
+  border-color: #c7d7fe;
+  color: var(--primary-dark);
+}
+
+.teacher-nav-link-active {
+  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.teacher-sidebar-footer {
+  display: grid;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.teacher-sidebar-action {
+  width: 100%;
+}
+
+.teacher-content {
+  padding: 20px;
+}
+
+.teacher-page-shell {
+  display: grid;
+  gap: 24px;
+}
+
+.teacher-page-section {
+  display: grid;
+  gap: 24px;
+}
+
+@media (min-width: 900px) {
+  .teacher-layout {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+
+  .teacher-sidebar {
+    position: sticky;
+    top: 0;
+    min-height: 100vh;
+    padding: 28px 22px;
+  }
+
+  .teacher-content {
+    padding: 28px;
+  }
+}
+
+@media (max-width: 899px) {
+  .teacher-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-sidebar {
+    border-right: none;
+    border-bottom: 1px solid #cbdcf8;
+  }
+
+  .teacher-sidebar-nav,
+  .teacher-sidebar-footer {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}
