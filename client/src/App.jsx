@@ -9,20 +9,13 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import CreateExam from "./pages/createExam";
 import AddQuestions from "./pages/addQuestions";
 import TeacherLayout from "./components/TeacherLayout";
+import StudentLayout from "./components/StudentLayout";
 
 const App = () => {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute roles={["student"]}>
-            <StudentDashboard />
-          </ProtectedRoute>
-        }
-      />
       <Route
         path="/exam/:examId"
         element={
@@ -32,13 +25,15 @@ const App = () => {
         }
       />
       <Route
-        path="/result/:examId/:studentId"
         element={
-          <ProtectedRoute>
-            <ResultPage />
+          <ProtectedRoute roles={["student"]}>
+            <StudentLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route path="/dashboard" element={<StudentDashboard />} />
+        <Route path="/result/:examId/:studentId" element={<ResultPage />} />
+      </Route>
 
       <Route
         element={

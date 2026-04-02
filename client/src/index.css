@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f4f7fb;
+  --bg: #f3f6fb;
   --surface: #ffffff;
-  --surface-muted: #f8fafc;
-  --border: #d9e2ec;
-  --text: #102a43;
-  --muted: #627d98;
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --success: #16a34a;
+  --surface-muted: #f7f9fc;
+  --border: #d7e0ea;
+  --text: #14263d;
+  --muted: #5f738c;
+  --primary: #2f6fed;
+  --primary-dark: #1f57c8;
+  --success: #1f8f5f;
   --danger: #dc2626;
-  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow: 0 14px 36px rgba(19, 38, 61, 0.08);
 }
 
 @layer base {
@@ -154,7 +154,7 @@
 
   .auth-side {
     border-right: 1px solid var(--border);
-    background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+    background: linear-gradient(180deg, #eef4ff 0%, #dfeaff 100%);
     padding: 32px;
   }
 
@@ -187,7 +187,7 @@
   .form-input:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.14);
   }
 
   .primary-button {
@@ -265,13 +265,13 @@
   }
 
   .option-card:hover {
-    border-color: #9db7ff;
-    background: #f8fbff;
+    border-color: #9cbcf8;
+    background: #f5f9ff;
   }
 
   .option-card-selected {
     border-color: var(--primary);
-    background: #eff6ff;
+    background: #eef4ff;
   }
 
   .option-badge {
@@ -281,7 +281,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    background: #eaf2ff;
+    background: #e7efff;
     color: var(--primary-dark);
     font-size: 0.85rem;
     font-weight: 700;
@@ -302,8 +302,8 @@
     min-width: 120px;
     justify-content: center;
     border-radius: 12px;
-    background: #ecfdf3;
-    color: #166534;
+    background: #e8f7ef;
+    color: #1c7a51;
     padding: 16px 20px;
     font-size: 2rem;
     font-weight: 700;
@@ -311,29 +311,29 @@
 
   .teacher-shell {
     background:
-      radial-gradient(circle at top right, rgba(14, 165, 233, 0.14), transparent 30%),
-      linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%);
+      radial-gradient(circle at top right, rgba(47, 111, 237, 0.14), transparent 30%),
+      linear-gradient(180deg, #f7faff 0%, #edf3fb 100%);
   }
 
   .teacher-dashboard-card {
-    border-color: #cbdcf8;
+    border-color: #cad8ec;
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.98));
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.98));
   }
 
   .teacher-hero {
     gap: 24px;
     background:
-      radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 30%),
-      linear-gradient(135deg, #f8fbff 0%, #eef4ff 100%);
+      radial-gradient(circle at top left, rgba(47, 111, 237, 0.12), transparent 30%),
+      linear-gradient(135deg, #f8fbff 0%, #edf4ff 100%);
   }
 
   .teacher-kicker {
     display: inline-flex;
     margin-bottom: 12px;
     border-radius: 999px;
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: #dfeaff;
+    color: #1f57c8;
     padding: 6px 12px;
     font-size: 0.78rem;
     font-weight: 700;
@@ -347,7 +347,7 @@
   }
 
   .teacher-badge-card {
-    border: 1px solid #c7d7fe;
+    border: 1px solid #c6d7f4;
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.88);
     padding: 16px;
@@ -357,18 +357,18 @@
     margin-top: 8px;
     font-size: 1.4rem;
     font-weight: 700;
-    color: #1e3a8a;
+    color: #1c4fae;
   }
 
   .teacher-stat-box {
-    border-color: #c7d7fe;
+    border-color: #c9d8f1;
     background: rgba(255, 255, 255, 0.78);
     backdrop-filter: blur(4px);
   }
 
   .teacher-empty-state {
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 247, 255, 0.98));
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 246, 255, 0.98));
   }
 
   .teacher-empty-action {
@@ -376,10 +376,10 @@
   }
 
   .teacher-exam-card {
-    border-color: #cbdcf8;
+    border-color: #cad8ec;
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(246, 249, 255, 1));
-    box-shadow: 0 18px 34px rgba(37, 99, 235, 0.08);
+      linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(245, 249, 255, 1));
+    box-shadow: 0 18px 34px rgba(47, 111, 237, 0.08);
   }
 
   .teacher-card-top {
@@ -393,8 +393,8 @@
     display: inline-flex;
     align-items: center;
     border-radius: 999px;
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: #dfeaff;
+    color: #1f57c8;
     padding: 8px 12px;
     font-size: 0.82rem;
     font-weight: 700;
@@ -450,17 +450,17 @@
   display: grid;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(14, 165, 233, 0.14), transparent 28%),
-    linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%);
+    radial-gradient(circle at top left, rgba(47, 111, 237, 0.14), transparent 28%),
+    linear-gradient(180deg, #f7faff 0%, #edf3fb 100%);
 }
 
 .teacher-sidebar {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  border-right: 1px solid #cbdcf8;
+  border-right: 1px solid #cad8ec;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 255, 0.98));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 248, 255, 0.98));
   padding: 24px 20px;
 }
 
@@ -475,9 +475,9 @@
 }
 
 .teacher-sidebar-profile {
-  border: 1px solid #cbdcf8;
+  border: 1px solid #cad8ec;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.88);
   padding: 16px;
 }
 
@@ -510,15 +510,15 @@
 }
 
 .teacher-nav-link:hover {
-  background: #eff6ff;
-  border-color: #c7d7fe;
+  background: #eef4ff;
+  border-color: #c6d7f4;
   color: var(--primary-dark);
 }
 
 .teacher-nav-link-active {
-  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: #bfdbfe;
-  color: #1d4ed8;
+  background: linear-gradient(180deg, #eef4ff 0%, #dfeaff 100%);
+  border-color: #b9cdf5;
+  color: #1f57c8;
 }
 
 .teacher-sidebar-footer {
@@ -545,6 +545,128 @@
   gap: 24px;
 }
 
+.student-layout {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(47, 111, 237, 0.1), transparent 26%),
+    linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+}
+
+.student-navbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #d4dfed;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  padding: 18px 24px;
+}
+
+.student-navbar-brand {
+  display: grid;
+  gap: 4px;
+}
+
+.student-navbar-subtitle {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.student-navbar-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.student-nav-link {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--text);
+  font-weight: 600;
+  padding: 10px 16px;
+  text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.student-nav-link:hover {
+  background: #eef4ff;
+  border-color: #c6d7f4;
+  color: #1f57c8;
+}
+
+.student-nav-link-active {
+  background: linear-gradient(180deg, #eef4ff 0%, #dfeaff 100%);
+  border-color: #b9cdf5;
+  color: #1f57c8;
+}
+
+.student-navbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.student-navbar-user {
+  text-align: right;
+}
+
+.student-navbar-name {
+  margin-top: 4px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.student-content {
+  padding: 24px;
+}
+
+.student-page-shell {
+  display: grid;
+  gap: 24px;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.student-page-section {
+  display: grid;
+  gap: 24px;
+}
+
+.student-hero {
+  background:
+    radial-gradient(circle at top left, rgba(47, 111, 237, 0.12), transparent 32%),
+    linear-gradient(135deg, #f8fbff 0%, #edf4ff 100%);
+  border: 1px solid #d4dfed;
+  border-radius: 18px;
+}
+
+.student-kicker {
+  display: inline-flex;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: #dfeaff;
+  color: #1f57c8;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.student-stat-box {
+  border-color: #d4dfed;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.student-exam-card {
+  border-color: #d4dfed;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(246, 250, 255, 1));
+}
+
 @media (min-width: 900px) {
   .teacher-layout {
     grid-template-columns: 280px minmax(0, 1fr);
@@ -560,6 +682,10 @@
   .teacher-content {
     padding: 28px;
   }
+
+  .student-content {
+    padding: 28px;
+  }
 }
 
 @media (max-width: 899px) {
@@ -569,11 +695,24 @@
 
   .teacher-sidebar {
     border-right: none;
-    border-bottom: 1px solid #cbdcf8;
+    border-bottom: 1px solid #cad8ec;
   }
 
   .teacher-sidebar-nav,
   .teacher-sidebar-footer {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .student-navbar {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .student-navbar-actions {
+    justify-content: center;
+  }
+
+  .student-navbar-user {
+    text-align: center;
   }
 }
