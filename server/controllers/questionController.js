@@ -37,17 +37,10 @@ const addQuestions = async (req, res) => {
 const getExamQuestions = async (req, res) => {
   try {
     const { examId } = req.params;
+    const isTeacherView = ["teacher", "org_admin"].includes(req.user?.role);
 
     if (!examId) {
       return res.status(400).json({ message: "ExamId required" });
-    }
-
-    const questions = await Question.find({ examId }).select("-correctAnswer"); // hide answer from students
-
-    if (questions.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No questions found for this exam" });
     }
 
     const exam = await Exam.findById(examId);
@@ -56,8 +49,22 @@ const getExamQuestions = async (req, res) => {
       return res.status(404).json({ message: "Exam not found" });
     }
 
-    if (!exam.isPublished) {
+    if (!exam.isPublished && !isTeacherView) {
       return res.status(403).json({ message: "Exam not available yet" });
+    }
+
+    const questionsQuery = Question.find({ examId });
+
+    if (!isTeacherView) {
+      questionsQuery.select("-correctAnswer");
+    }
+
+    const questions = await questionsQuery;
+
+    if (questions.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No questions found for this exam" });
     }
 
     res.status(200).json({ questions });
