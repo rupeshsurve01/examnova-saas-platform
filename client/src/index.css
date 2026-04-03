@@ -654,6 +654,35 @@
   margin-top: 16px;
 }
 
+.teacher-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+
+.teacher-results-table th,
+.teacher-results-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 16px 14px;
+  text-align: left;
+}
+
+.teacher-results-table th {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.teacher-results-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.teacher-results-table tbody tr:hover {
+  background: #f7faff;
+}
+
 .student-layout {
   min-height: 100vh;
   background:

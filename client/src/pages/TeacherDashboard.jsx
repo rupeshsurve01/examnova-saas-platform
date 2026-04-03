@@ -47,6 +47,11 @@ const TeacherDashboard = () => {
     navigate("/add-questions", { state: { examId } });
   };
 
+  const handleViewResults = (examId) => {
+    navigate(`/teacher-results/${examId}`);
+  };
+
+
   const recentExamCode =
     exams.find((exam) => exam.examCode)?.examCode || "Not assigned";
 
@@ -153,12 +158,21 @@ const TeacherDashboard = () => {
                   >
                     Manage Questions
                   </button>
+
+                  <button
+                    onClick={() => handleViewResults(exam._id)}
+                    className="secondary-button"
+                  >
+                    View Results
+                  </button>
+                  
                   <button
                     onClick={handleCreateExam}
                     className="secondary-button"
                   >
                     Create Another
                   </button>
+                  
                 </div>
               </article>
             ))}

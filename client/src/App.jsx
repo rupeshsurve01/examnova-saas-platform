@@ -10,6 +10,7 @@ import CreateExam from "./pages/createExam";
 import AddQuestions from "./pages/addQuestions";
 import TeacherLayout from "./components/TeacherLayout";
 import StudentLayout from "./components/StudentLayout";
+import TeacherResults from "./pages/TeacherResults";
 
 const App = () => {
   return (
@@ -45,6 +46,7 @@ const App = () => {
         <Route path="/teacher" element={<TeacherDashboard />} />
         <Route path="/exams" element={<CreateExam />} />
         <Route path="/add-questions" element={<AddQuestions />} />
+        <Route path="/teacher-results/:examId" element={<TeacherResults />} />
       </Route>
     </Routes>
   );
