@@ -75,7 +75,10 @@ const TeacherDashboard = () => {
             <p className="stat-label">Latest Exam Code</p>
             <p className="teacher-badge-value">{recentExamCode}</p>
           </div>
-        </div>
+          
+        </div><div className="stats-grid">Total Attempts</div>
+        <div className="stats-grid">Highest Score</div>
+        <div className="stats-grid">Average Score</div>
 
         <div className="stats-grid">
           <div className="stat-box teacher-stat-box">
@@ -165,7 +168,7 @@ const TeacherDashboard = () => {
                   >
                     View Results
                   </button>
-                  
+
                   <button
                     onClick={handleCreateExam}
                     className="secondary-button"

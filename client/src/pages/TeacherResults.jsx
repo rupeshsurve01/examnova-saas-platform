@@ -27,6 +27,21 @@ const TeacherResults = () => {
     fetchResults();
   }, [examId]);
 
+  const totalAttempts = attempts.length;
+  const highestScore =
+    attempts.length > 0
+      ? Math.max(...attempts.map((attempt) => Number(attempt.score) || 0))
+      : 0;
+  const averageScore =
+    attempts.length > 0
+      ? (
+          attempts.reduce(
+            (sum, attempt) => sum + (Number(attempt.score) || 0),
+            0,
+          ) / attempts.length
+        ).toFixed(1)
+      : "0.0";
+
   if (loading) {
     return (
       <div className="teacher-page-shell">
@@ -95,6 +110,21 @@ const TeacherResults = () => {
           <p className="section-subtitle">
             This page updates from the recorded attempts for the selected exam.
           </p>
+        </div>
+
+        <div className="stats-grid">
+          <div className="stat-box teacher-stat-box">
+            <p className="stat-label">Total Attempts</p>
+            <p className="stat-value">{totalAttempts}</p>
+          </div>
+          <div className="stat-box teacher-stat-box">
+            <p className="stat-label">Highest Score</p>
+            <p className="stat-value">{highestScore}</p>
+          </div>
+          <div className="stat-box teacher-stat-box">
+            <p className="stat-label">Average Score</p>
+            <p className="stat-value">{averageScore}</p>
+          </div>
         </div>
       </section>
 
