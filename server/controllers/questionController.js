@@ -74,4 +74,93 @@ const getExamQuestions = async (req, res) => {
   }
 };
 
-module.exports = { addQuestions, getExamQuestions };
+const getAuthorizedQuestion = async (questionId, user) => {
+  const question = await Question.findById(questionId);
+
+  if (!question) {
+    return { status: 404, body: { message: "Question not found" } };
+  }
+
+  const exam = await Exam.findById(question.examId);
+
+  if (!exam) {
+    return { status: 404, body: { message: "Associated exam not found" } };
+  }
+
+  const isOrgAdmin = user?.role === "org_admin";
+  const isOwner =
+    exam.createdBy && exam.createdBy.toString() === user?._id?.toString();
+
+  if (!isOrgAdmin && !isOwner) {
+    return {
+      status: 403,
+      body: { message: "Unauthorized to modify this question" },
+    };
+  }
+
+  return { question, exam };
+};
+
+const updateQuestion = async (req, res) => {
+  try {
+    const { questionId } = req.params;
+    const { questionText, options, correctAnswer, marks } = req.body;
+
+    if (
+      !questionId ||
+      !questionText ||
+      !options ||
+      correctAnswer === undefined ||
+      !marks
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const authorization = await getAuthorizedQuestion(questionId, req.user);
+
+    if (authorization.status) {
+      return res.status(authorization.status).json(authorization.body);
+    }
+
+    const { question } = authorization;
+
+    question.questionText = questionText;
+    question.options = options;
+    question.correctAnswer = correctAnswer;
+    question.marks = marks;
+
+    await question.save();
+
+    res.status(200).json({ message: "Question updated successfully", question });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Server Error" });
+  } 
+};
+
+const deleteQuestion = async (req, res) => {
+  try {
+    const { questionId } = req.params;
+
+    if (!questionId) {
+      return res.status(400).json({ message: "QuestionId required" });
+    }
+
+    const authorization = await getAuthorizedQuestion(questionId, req.user);
+
+    if (authorization.status) {
+      return res.status(authorization.status).json(authorization.body);
+    }
+
+    const { question } = authorization;
+
+    await question.deleteOne();
+
+    res.status(200).json({ message: "Question deleted successfully" });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Server Error" });   
+  }
+};
+
+module.exports = { addQuestions, getExamQuestions, updateQuestion, deleteQuestion };

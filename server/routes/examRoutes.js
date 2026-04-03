@@ -9,7 +9,9 @@ const {
 
 const {
   addQuestions,
-  getExamQuestions
+  getExamQuestions,
+  updateQuestion,
+  deleteQuestion
 } = require("../controllers/questionController");
 
 const {
@@ -40,6 +42,8 @@ router.post("/:examId/submit", protect, authorize("student"), submitExam);
 // ---------- QUESTIONS ----------
 router.post("/:examId/questions", protect, authorize("teacher", "org_admin"), addQuestions);
 router.get("/:examId/questions", protect, authorize("student", "teacher", "org_admin"), getExamQuestions);
+router.put("/questions/:questionId", protect, authorize("teacher", "org_admin"), updateQuestion);
+router.delete("/questions/:questionId", protect, authorize("teacher", "org_admin"), deleteQuestion);
 
 // ---------- RESULTS ----------
 router.get("/:examId/result/:studentId", protect, getStudentResult);

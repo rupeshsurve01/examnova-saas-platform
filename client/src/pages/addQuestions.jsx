@@ -29,6 +29,7 @@ function AddQuestions() {
   const [publishing, setPublishing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
 
   useEffect(() => {
     const fetchTeacherExams = async () => {
@@ -167,19 +168,40 @@ function AddQuestions() {
       setErrorMessage("");
       setSuccessMessage("");
 
-      const response = await API.post(`/exams/${selectedExamId}/questions`, {
-        questionText: trimmedQuestion,
-        options: trimmedOptions,
-        correctAnswer: optionLabels.indexOf(formData.correctAnswer),
-        marks,
-      });
+      const response = editingQuestionId
+        ? await API.put(`/exams/questions/${editingQuestionId}`, {
+            questionText: trimmedQuestion,
+            options: trimmedOptions,
+            correctAnswer: optionLabels.indexOf(formData.correctAnswer),
+            marks,
+          })
+        : await API.post(`/exams/${selectedExamId}/questions`, {
+            questionText: trimmedQuestion,
+            options: trimmedOptions,
+            correctAnswer: optionLabels.indexOf(formData.correctAnswer),
+            marks,
+          });
 
-      setQuestions((current) => [response.data.question, ...current]);
+      if (editingQuestionId) {
+        setQuestions((current) =>
+          current.map((question) =>
+            question._id === editingQuestionId ? response.data.question : question,
+          ),
+        );
+        setSuccessMessage("Question updated successfully.");
+        setEditingQuestionId(null);
+      } else {
+        setQuestions((current) => [response.data.question, ...current]);
+        setSuccessMessage("Question added successfully.");
+      }
+
       setFormData(createEmptyForm());
-      setSuccessMessage("Question added successfully.");
     } catch (error) {
       setErrorMessage(
-        error.response?.data?.message || "Unable to add this question.",
+        error.response?.data?.message ||
+          (editingQuestionId
+            ? "Unable to update this question."
+            : "Unable to add this question."),
       );
     } finally {
       setSubmitting(false);
@@ -376,10 +398,13 @@ function AddQuestions() {
 
           <div className="panel p-6">
             <div>
-              <h2 className="section-title">Add a new question</h2>
+              <h2 className="section-title">
+                {editingQuestionId ? "Edit question" : "Add a new question"}
+              </h2>
               <p className="section-subtitle">
-                Keep options concise and mark the single correct answer for
-                scoring.
+                {editingQuestionId
+                  ? "Update the selected question, then save your changes."
+                  : "Keep options concise and mark the single correct answer for scoring."}
               </p>
             </div>
 
@@ -481,19 +506,26 @@ function AddQuestions() {
                   className="primary-button"
                   disabled={!selectedExamId || submitting}
                 >
-                  {submitting ? "Saving Question..." : "Add Question"}
+                  {submitting
+                    ? editingQuestionId
+                      ? "Updating Question..."
+                      : "Saving Question..."
+                    : editingQuestionId
+                      ? "Update Question"
+                      : "Add Question"}
                 </button>
                 <button
                   type="button"
                   className="secondary-button"
                   onClick={() => {
+                    setEditingQuestionId(null);
                     setFormData(createEmptyForm());
                     setErrorMessage("");
                     setSuccessMessage("");
                   }}
                   disabled={submitting}
                 >
-                  Reset Form
+                  {editingQuestionId ? "Cancel Edit" : "Reset Form"}
                 </button>
               </div>
             </form>
@@ -564,9 +596,23 @@ function AddQuestions() {
                     })}
                   </div>
 
-                  <div className="mt-4 text-right text-xs text-[var(--muted)]">
-                    Answer key visible because this is a teacher view.
-                  </div>
+                  <button
+                    type="button"
+                    className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-800"
+                    onClick={() => {
+                      setEditingQuestionId(question._id);
+                      setFormData({
+                        questionText: question.questionText,
+                        options: question.options,
+                        correctAnswer: optionLabels[question.correctAnswer] || "A",
+                        marks: String(question.marks),
+                      });
+                      setErrorMessage("");
+                      setSuccessMessage("");
+                    }}
+                  >
+                    Edit Question
+                  </button>
                 </article>
               ))}
             </div>

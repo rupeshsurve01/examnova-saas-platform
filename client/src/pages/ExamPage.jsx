@@ -12,10 +12,7 @@ function ExamPage() {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
 
-  useEffect(() => {
-    fetchQuestions();
-  }, []);
-
+  
   const fetchQuestions = async () => {
     try {
       const res = await API.get(`/exams/${examId}/questions`);
@@ -24,6 +21,9 @@ function ExamPage() {
       console.log(err);
     }
   };
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
 
   const handleAnswer = (questionId, optionIndex) => {
     setAnswers({
