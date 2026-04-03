@@ -545,6 +545,115 @@
   gap: 24px;
 }
 
+.question-bank-card {
+  border: 1px solid #dbe6f6;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+  padding: 20px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.question-bank-card:hover {
+  border-color: #bfd3f8;
+  box-shadow: 0 16px 32px rgba(47, 111, 237, 0.08);
+  transform: translateY(-1px);
+}
+
+.question-bank-card-editing {
+  border-color: #7da7f4;
+  box-shadow: 0 18px 34px rgba(47, 111, 237, 0.14);
+  background: linear-gradient(180deg, #ffffff 0%, #f2f7ff 100%);
+}
+
+.question-bank-header-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.question-editing-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #1f57c8;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.question-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 12px rgba(19, 38, 61, 0.06);
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.question-action-button:hover {
+  transform: translateY(-1px);
+}
+
+.question-action-button-edit {
+  border-color: #d7e4fb;
+  color: #1f57c8;
+}
+
+.question-action-button-edit:hover {
+  border-color: #bfd3f8;
+  background: #eef4ff;
+  box-shadow: 0 10px 18px rgba(47, 111, 237, 0.12);
+}
+
+.question-action-button-delete {
+  border-color: #f4d1cb;
+  color: #c0392b;
+}
+
+.question-action-button-delete:hover {
+  border-color: #f3c3bc;
+  background: #fff2f0;
+  box-shadow: 0 10px 18px rgba(192, 57, 43, 0.1);
+}
+
+.question-action-button-active {
+  border-color: #a8c4fa;
+  background: linear-gradient(180deg, #eef4ff 0%, #dfeaff 100%);
+  box-shadow: 0 12px 22px rgba(47, 111, 237, 0.14);
+}
+
+.question-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.question-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
 .student-layout {
   min-height: 100vh;
   background:

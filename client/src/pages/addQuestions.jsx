@@ -208,6 +208,38 @@ function AddQuestions() {
     }
   };
 
+  const handleDeleteQuestion = async (questionId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this question? This action cannot be undone.",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      await API.delete(`/exams/questions/${questionId}`);
+
+      setQuestions((current) =>
+        current.filter((question) => question._id !== questionId),
+      );
+
+      if (editingQuestionId === questionId) {
+        setEditingQuestionId(null);
+        setFormData(createEmptyForm());
+      }
+
+      setSuccessMessage("Question deleted successfully.");
+    } catch (error) {
+      setErrorMessage(
+        error.response?.data?.message || "Unable to delete this question.",
+      );
+    }
+  };
+
   const handlePublish = async () => {
     if (!selectedExamId) {
       setErrorMessage("Select an exam before publishing.");
@@ -556,7 +588,11 @@ function AddQuestions() {
               {questions.map((question, index) => (
                 <article
                   key={question._id}
-                  className="rounded-2xl border border-[#dbe6f6] bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
+                  className={`question-bank-card ${
+                    editingQuestionId === question._id
+                      ? "question-bank-card-editing"
+                      : ""
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -565,9 +601,14 @@ function AddQuestions() {
                         {question.questionText}
                       </h3>
                     </div>
-                    <span className="teacher-code-pill">
-                      {question.marks} mark{Number(question.marks) > 1 ? "s" : ""}
-                    </span>
+                    <div className="question-bank-header-badges">
+                      {editingQuestionId === question._id ? (
+                        <span className="question-editing-pill">Editing</span>
+                      ) : null}
+                      <span className="teacher-code-pill">
+                        {question.marks} mark{Number(question.marks) > 1 ? "s" : ""}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="mt-4 grid gap-3">
@@ -596,23 +637,40 @@ function AddQuestions() {
                     })}
                   </div>
 
-                  <button
-                    type="button"
-                    className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-800"
-                    onClick={() => {
-                      setEditingQuestionId(question._id);
-                      setFormData({
-                        questionText: question.questionText,
-                        options: question.options,
-                        correctAnswer: optionLabels[question.correctAnswer] || "A",
-                        marks: String(question.marks),
-                      });
-                      setErrorMessage("");
-                      setSuccessMessage("");
-                    }}
-                  >
-                    Edit Question
-                  </button>
+                  <div className="question-actions-row">
+                    <button
+                      type="button"
+                      className={`question-action-button question-action-button-edit ${
+                        editingQuestionId === question._id
+                          ? "question-action-button-active"
+                          : ""
+                      }`}
+                      onClick={() => {
+                        setEditingQuestionId(question._id);
+                        setFormData({
+                          questionText: question.questionText,
+                          options: question.options,
+                          correctAnswer: optionLabels[question.correctAnswer] || "A",
+                          marks: String(question.marks),
+                        });
+                        setErrorMessage("");
+                        setSuccessMessage("");
+                      }}
+                    >
+                      <span className="question-action-icon">✎</span>
+                      Edit Question
+                    </button>
+                    <button
+                      type="button"
+                      className="question-action-button question-action-button-delete"
+                      onClick={() => {
+                        handleDeleteQuestion(question._id);
+                      }}
+                    >
+                      <span className="question-action-icon">×</span>
+                      Delete Question
+                    </button>
+                  </div>
                 </article>
               ))}
             </div>
