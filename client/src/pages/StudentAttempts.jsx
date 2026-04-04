@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const StudentAttempts = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [attempts, setAttempts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -30,6 +32,31 @@ const StudentAttempts = () => {
   useEffect(() => {
     fetchAttempts();
   }, [user?.id]);
+
+  const bestScore =
+    attempts.length > 0
+      ? Math.max(...attempts.map((attempt) => Number(attempt.score) || 0))
+      : 0;
+  const averageScore =
+    attempts.length > 0
+      ? (
+          attempts.reduce(
+            (total, attempt) => total + (Number(attempt.score) || 0),
+            0,
+          ) / attempts.length
+        ).toFixed(1)
+      : "0.0";
+  const latestAttemptDate =
+    attempts.length > 0
+      ? attempts.reduce((latest, attempt) => {
+          if (!attempt.submittedAt) {
+            return latest;
+          }
+
+          const submittedAt = new Date(attempt.submittedAt);
+          return !latest || submittedAt > latest ? submittedAt : latest;
+        }, null)
+      : null;
 
   if (loading) {
     return (
@@ -126,13 +153,19 @@ const StudentAttempts = () => {
           </div>
           <div className="stat-box student-stat-box">
             <p className="stat-label">Best Score</p>
-            <p className="stat-value">
-              {Math.max(...attempts.map((attempt) => Number(attempt.score) || 0))}
-            </p>
+            <p className="stat-value">{bestScore}</p>
           </div>
           <div className="stat-box student-stat-box">
-            <p className="stat-label">Latest Status</p>
-            <p className="stat-value">Recorded</p>
+            <p className="stat-label">Average Score</p>
+            <p className="stat-value">{averageScore}</p>
+          </div>
+          <div className="stat-box student-stat-box">
+            <p className="stat-label">Latest Attempt</p>
+            <p className="stat-value">
+              {latestAttemptDate
+                ? latestAttemptDate.toLocaleDateString()
+                : "N/A"}
+            </p>
           </div>
         </div>
       </section>
@@ -140,13 +173,23 @@ const StudentAttempts = () => {
       <section className="student-page-section">
         <div className="exam-grid">
           {attempts.map((attempt) => (
-            <article key={attempt._id} className="exam-card student-exam-card">
-              <h2 className="section-title">
-                {attempt.examId?.title || "Unknown Exam"}
-              </h2>
-              <p className="section-subtitle">
-                Review your performance for this completed exam attempt.
-              </p>
+            <article
+              key={attempt._id}
+              className="exam-card student-exam-card student-attempt-card"
+            >
+              <div className="student-attempt-header">
+                <div>
+                  <h2 className="section-title">
+                    {attempt.examId?.title || "Unknown Exam"}
+                  </h2>
+                  <p className="section-subtitle">
+                    Review your performance for this completed exam attempt.
+                  </p>
+                </div>
+                <span className="student-attempt-score-pill">
+                  Score: {attempt.score ?? 0}
+                </span>
+              </div>
 
               <div className="exam-card-meta mt-5">
                 <div className="meta-row">
@@ -162,10 +205,6 @@ const StudentAttempts = () => {
                   </strong>
                 </div>
                 <div className="meta-row">
-                  <span>Score</span>
-                  <strong>{attempt.score ?? 0}</strong>
-                </div>
-                <div className="meta-row">
                   <span>Submitted At</span>
                   <strong>
                     {attempt.submittedAt
@@ -174,6 +213,20 @@ const StudentAttempts = () => {
                   </strong>
                 </div>
               </div>
+              <button
+                type="button"
+                className="primary-button mt-6 w-full"
+                onClick={() => {
+                  if (!attempt.examId?._id) {
+                    return;
+                  }
+
+                  navigate(`/result/${attempt.examId._id}/${user.id}`);
+                }}
+                disabled={!attempt.examId?._id}
+              >
+                View Result
+              </button>
             </article>
           ))}
         </div>
