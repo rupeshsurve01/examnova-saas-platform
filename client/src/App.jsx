@@ -11,6 +11,7 @@ import AddQuestions from "./pages/addQuestions";
 import TeacherLayout from "./components/TeacherLayout";
 import StudentLayout from "./components/StudentLayout";
 import TeacherResults from "./pages/TeacherResults";
+import StudentAttempts from "./pages/StudentAttempts";
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
       >
         <Route path="/dashboard" element={<StudentDashboard />} />
         <Route path="/result/:examId/:studentId" element={<ResultPage />} />
+        <Route path="/attempts" element={<StudentAttempts />} />
       </Route>
 
       <Route

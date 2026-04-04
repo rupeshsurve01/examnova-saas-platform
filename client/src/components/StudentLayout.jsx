@@ -28,6 +28,15 @@ function StudentLayout() {
           >
             Dashboard
           </NavLink>
+
+          <NavLink
+            to="/attempts"
+            className={({ isActive }) =>
+              `student-nav-link${isActive ? " student-nav-link-active" : ""}`
+            }
+          >
+            My Attempts
+          </NavLink>
         </nav>
 
         <div className="student-navbar-actions">
