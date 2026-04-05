@@ -860,6 +860,10 @@
   gap: 10px;
 }
 
+.student-search-group {
+  min-width: min(100%, 320px);
+}
+
 .student-filter-label {
   font-size: 0.78rem;
   font-weight: 700;
@@ -933,7 +937,7 @@
   }
 
   .student-attempt-controls {
-    grid-template-columns: auto auto;
+    grid-template-columns: minmax(260px, 320px) auto auto;
     align-items: end;
   }
 }

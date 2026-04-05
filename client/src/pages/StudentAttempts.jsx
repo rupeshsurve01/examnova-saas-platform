@@ -11,6 +11,7 @@ const StudentAttempts = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [sortBy, setSortBy] = useState("latest");
   const [filterBy, setFilterBy] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchAttempts = async () => {
     if (!user?.id) {
@@ -60,6 +61,18 @@ const StudentAttempts = () => {
         }, null)
       : null;
   const filteredAttempts = attempts.filter((attempt) => {
+    const searchValue = searchQuery.trim().toLowerCase();
+    const title = attempt.examId?.title?.toLowerCase() || "";
+    const examCode = attempt.examId?.examCode?.toLowerCase() || "";
+
+    if (
+      searchValue &&
+      !title.includes(searchValue) &&
+      !examCode.includes(searchValue)
+    ) {
+      return false;
+    }
+
     if (filterBy === "completed") {
       return Boolean(attempt.submittedAt);
     }
@@ -211,6 +224,17 @@ const StudentAttempts = () => {
           </div>
 
           <div className="student-attempt-controls">
+            <label className="student-filter-group student-search-group">
+              <span className="student-filter-label">Search</span>
+              <input
+                type="text"
+                className="form-input student-filter-input"
+                placeholder="Search by exam title or code"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+              />
+            </label>
+
             <label className="student-filter-group">
               <span className="student-filter-label">Sort By</span>
               <select
@@ -267,7 +291,8 @@ const StudentAttempts = () => {
           <div className="panel p-8 text-center">
             <h2 className="section-title">No attempts match this view</h2>
             <p className="section-subtitle">
-              Try a different filter or sort option to see more results.
+              Try a different search, filter, or sort option to see more
+              results.
             </p>
           </div>
         ) : (
