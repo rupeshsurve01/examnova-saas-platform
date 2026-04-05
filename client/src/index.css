@@ -1144,3 +1144,174 @@
     text-align: center;
   }
 }
+
+@media print {
+  @page {
+    margin: 0.6in;
+    size: auto;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+    font-size: 11pt;
+    line-height: 1.35;
+  }
+
+  .teacher-sidebar,
+  .student-navbar,
+  .no-print {
+    display: none !important;
+  }
+
+  .teacher-layout,
+  .student-layout,
+  .teacher-content,
+  .student-content,
+  .student-page-shell,
+  .student-page-section {
+    display: block;
+    padding: 0;
+    margin: 0;
+    max-width: none;
+    background: transparent;
+  }
+
+  .student-page-shell {
+    gap: 12px;
+  }
+
+  .page-header,
+  .panel,
+  .stat-box,
+  .result-review-card,
+  .result-option-card,
+  .student-hero,
+  .student-stat-box {
+    border: 1px solid #d1d5db;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+  }
+
+  .page-header,
+  .panel,
+  .result-review-card {
+    border-radius: 0;
+  }
+
+  .page-header {
+    padding: 0 0 14px;
+    border: none;
+  }
+
+  .panel {
+    padding: 16px !important;
+  }
+
+  .student-page-shell,
+  .result-review-list,
+  .result-answer-summary,
+  .stats-grid {
+    gap: 12px;
+  }
+
+  .student-hero,
+  .result-review-card,
+  .result-option-card,
+  .stat-box,
+  .panel {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .page-title {
+    font-size: 20pt;
+    line-height: 1.2;
+  }
+
+  .section-title {
+    font-size: 13pt;
+    line-height: 1.3;
+  }
+
+  .page-subtitle,
+  .section-subtitle,
+  .meta-row,
+  .result-option-copy p {
+    color: #374151 !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .result-review-list {
+    margin-top: 16px;
+  }
+
+  .result-review-header,
+  .result-summary-top,
+  .student-attempt-header {
+    display: block;
+  }
+
+  .result-status-pill,
+  .result-summary-badge {
+    margin-top: 10px;
+  }
+
+  .result-options-list,
+  .result-answer-summary {
+    margin-top: 14px;
+  }
+
+  .result-answer-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .result-option-card {
+    padding: 10px 12px;
+  }
+
+  .option-badge {
+    border: 1px solid #d1d5db;
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  .student-kicker,
+  .result-status-pill,
+  .result-summary-badge,
+  .result-option-tag,
+  .student-attempt-score-pill {
+    border: 1px solid #d1d5db;
+    color: #111827 !important;
+    background: #f9fafb !important;
+  }
+
+  .result-score {
+    border: 1px solid #d1d5db;
+    color: #111827;
+    background: #ffffff;
+  }
+
+  .result-score,
+  .stat-value,
+  .result-answer-value {
+    font-size: 13pt !important;
+  }
+
+  .student-attempt-card::before {
+    display: none;
+  }
+
+  a {
+    color: #111827;
+    text-decoration: none;
+  }
+
+  a[href]::after {
+    content: "";
+  }
+}

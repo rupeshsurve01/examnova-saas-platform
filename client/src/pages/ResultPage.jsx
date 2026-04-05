@@ -10,6 +10,10 @@ function ResultPage() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   useEffect(() => {
     const fetchResult = async () => {
       try {
@@ -62,7 +66,7 @@ function ResultPage() {
           </p>
           <Link
             to="/attempts"
-            className="primary-button mt-8 inline-block text-center no-underline"
+            className="primary-button mt-8 inline-block text-center no-underline no-print"
           >
             Back to Attempts
           </Link>
@@ -144,12 +148,21 @@ function ResultPage() {
                 answer.
               </p>
             </div>
-            <Link
-              to="/attempts"
-              className="secondary-button inline-block text-center no-underline"
-            >
-              Back to Attempts
-            </Link>
+            <div className="result-summary-actions no-print">
+              <Link
+                to="/attempts"
+                className="secondary-button inline-block text-center no-underline"
+              >
+                Back to Attempts
+              </Link>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={handlePrint}
+              >
+                Print Result
+              </button>
+            </div>
           </div>
 
           <div className="result-review-list">
