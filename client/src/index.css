@@ -843,6 +843,69 @@
   white-space: nowrap;
 }
 
+.student-attempt-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+}
+
+.student-attempt-controls {
+  display: grid;
+  gap: 16px;
+}
+
+.student-filter-group {
+  display: grid;
+  gap: 10px;
+}
+
+.student-filter-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.student-filter-input {
+  min-width: 180px;
+}
+
+.student-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.student-filter-chip {
+  border: 1px solid #d4dfed;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text);
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.student-filter-chip:hover {
+  border-color: #bfd3f8;
+  background: #eef4ff;
+  color: #1f57c8;
+}
+
+.student-filter-chip-active {
+  border-color: #b9cdf5;
+  background: linear-gradient(180deg, #eef4ff 0%, #dfeaff 100%);
+  color: #1f57c8;
+  box-shadow: 0 10px 18px rgba(47, 111, 237, 0.1);
+}
+
 @media (min-width: 900px) {
   .teacher-layout {
     grid-template-columns: 280px minmax(0, 1fr);
@@ -861,6 +924,17 @@
 
   .student-content {
     padding: 28px;
+  }
+
+  .student-attempt-toolbar {
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: row;
+  }
+
+  .student-attempt-controls {
+    grid-template-columns: auto auto;
+    align-items: end;
   }
 }
 

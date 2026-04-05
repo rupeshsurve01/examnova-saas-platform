@@ -9,6 +9,8 @@ const StudentAttempts = () => {
   const [attempts, setAttempts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [sortBy, setSortBy] = useState("latest");
+  const [filterBy, setFilterBy] = useState("all");
 
   const fetchAttempts = async () => {
     if (!user?.id) {
@@ -57,6 +59,35 @@ const StudentAttempts = () => {
           return !latest || submittedAt > latest ? submittedAt : latest;
         }, null)
       : null;
+  const filteredAttempts = attempts.filter((attempt) => {
+    if (filterBy === "completed") {
+      return Boolean(attempt.submittedAt);
+    }
+
+    if (filterBy === "pending") {
+      return !attempt.submittedAt;
+    }
+
+    return true;
+  });
+  const visibleAttempts = [...filteredAttempts].sort((first, second) => {
+    if (sortBy === "highest") {
+      return (Number(second.score) || 0) - (Number(first.score) || 0);
+    }
+
+    if (sortBy === "lowest") {
+      return (Number(first.score) || 0) - (Number(second.score) || 0);
+    }
+
+    const firstDate = first.submittedAt
+      ? new Date(first.submittedAt).getTime()
+      : 0;
+    const secondDate = second.submittedAt
+      ? new Date(second.submittedAt).getTime()
+      : 0;
+
+    return secondDate - firstDate;
+  });
 
   if (loading) {
     return (
@@ -171,8 +202,77 @@ const StudentAttempts = () => {
       </section>
 
       <section className="student-page-section">
+        <div className="panel student-attempt-toolbar">
+          <div>
+            <h2 className="section-title">History Controls</h2>
+            <p className="section-subtitle">
+              Showing {visibleAttempts.length} of {attempts.length} attempts.
+            </p>
+          </div>
+
+          <div className="student-attempt-controls">
+            <label className="student-filter-group">
+              <span className="student-filter-label">Sort By</span>
+              <select
+                className="form-input student-filter-input"
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value)}
+              >
+                <option value="latest">Latest</option>
+                <option value="highest">Highest Score</option>
+                <option value="lowest">Lowest Score</option>
+              </select>
+            </label>
+
+            <div className="student-filter-group">
+              <span className="student-filter-label">Filter</span>
+              <div className="student-filter-chips">
+                <button
+                  type="button"
+                  className={`student-filter-chip ${
+                    filterBy === "all" ? "student-filter-chip-active" : ""
+                  }`}
+                  onClick={() => setFilterBy("all")}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  className={`student-filter-chip ${
+                    filterBy === "completed"
+                      ? "student-filter-chip-active"
+                      : ""
+                  }`}
+                  onClick={() => setFilterBy("completed")}
+                >
+                  Completed
+                </button>
+                <button
+                  type="button"
+                  className={`student-filter-chip ${
+                    filterBy === "pending"
+                      ? "student-filter-chip-active"
+                      : ""
+                  }`}
+                  onClick={() => setFilterBy("pending")}
+                >
+                  Pending
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {visibleAttempts.length === 0 ? (
+          <div className="panel p-8 text-center">
+            <h2 className="section-title">No attempts match this view</h2>
+            <p className="section-subtitle">
+              Try a different filter or sort option to see more results.
+            </p>
+          </div>
+        ) : (
         <div className="exam-grid">
-          {attempts.map((attempt) => (
+          {visibleAttempts.map((attempt) => (
             <article
               key={attempt._id}
               className="exam-card student-exam-card student-attempt-card"
@@ -230,6 +330,7 @@ const StudentAttempts = () => {
             </article>
           ))}
         </div>
+        )}
       </section>
     </div>
   );
