@@ -4,10 +4,29 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function StudentDashboard() {
-  
   const [exams, setExams] = useState([]);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  const getAttemptRouteForExam = async (examId) => {
+    const attemptResponse = await API.get(`/exams/${examId}/attempt`);
+    const attempt = attemptResponse.data;
+    const durationInMinutes = Number(attempt?.examId?.duration) || 0;
+    const startedAt = attempt?.startedAt ? new Date(attempt.startedAt) : null;
+    const endTime = startedAt
+      ? startedAt.getTime() + durationInMinutes * 60 * 1000
+      : null;
+
+    if (attempt?.submittedAt) {
+      return `/result/${examId}/${user.id}`;
+    }
+
+    if (endTime && endTime <= Date.now()) {
+      throw new Error("This exam attempt has already expired.");
+    }
+
+    return `/exam/${examId}`;
+  };
 
   const startExam = async (examId) => {
     try {
@@ -25,7 +44,16 @@ function StudentDashboard() {
         error.response?.data?.message || "Unable to start the exam";
 
       if (message === "Exam already started") {
-        navigate(`/exam/${examId}`);
+        try {
+          const route = await getAttemptRouteForExam(examId);
+          navigate(route);
+        } catch (attemptError) {
+          alert(
+            attemptError.response?.data?.message ||
+              attemptError.message ||
+              "This exam attempt is no longer available.",
+          );
+        }
         return;
       }
       alert(message);

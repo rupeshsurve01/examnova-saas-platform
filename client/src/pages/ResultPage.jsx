@@ -66,7 +66,7 @@ function ResultPage() {
           </p>
           <Link
             to="/attempts"
-            className="primary-button mt-8 inline-block text-center no-underline no-print"
+            className="result-action-button result-action-button-primary mt-8 inline-block text-center no-underline no-print"
           >
             Back to Attempts
           </Link>
@@ -151,13 +151,13 @@ function ResultPage() {
             <div className="result-summary-actions no-print">
               <Link
                 to="/attempts"
-                className="secondary-button inline-block text-center no-underline"
+                className="result-action-button result-action-button-secondary inline-block text-center no-underline"
               >
                 Back to Attempts
               </Link>
               <button
                 type="button"
-                className="secondary-button"
+                className="result-action-button result-action-button-secondary"
                 onClick={handlePrint}
               >
                 Print Result

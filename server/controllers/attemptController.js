@@ -166,10 +166,35 @@ const studentId = req.user._id;
   }
 };
 
+const getStudentExamAttempt = async (req, res) => {
+  try {
+    const { examId } = req.params;
+    const studentId = req.user._id;
+
+    if (!examId || !studentId) {
+      return res.status(400).json({ message: "ExamId and studentId required" });
+    }
+
+    const attempt = await Attempt.findOne({ examId, studentId }).populate(
+      "examId",
+      "title duration examCode",
+    );
+
+    if (!attempt) {
+      return res.status(404).json({ message: "No attempt found for this exam" });
+    }
+
+    res.status(200).json(attempt);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
 
 module.exports = {
   getStudentResult,
   getExamAttempts,
   getStudentAttempts,
-  startExam
+  startExam,
+  getStudentExamAttempt
 };
