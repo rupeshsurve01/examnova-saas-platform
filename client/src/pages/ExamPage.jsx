@@ -9,6 +9,8 @@ function ExamPage() {
   const { examId } = useParams();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const answerStorageKey =
+    user?.id && examId ? `exam-answers-${examId}-${user.id}` : null;
 
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
@@ -17,6 +19,8 @@ function ExamPage() {
   const [examTitle, setExamTitle] = useState("Online Exam");
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveStatus, setSaveStatus] = useState("Idle");
+  const [lastSavedAt, setLastSavedAt] = useState(null);
 
   const fetchExamData = useCallback(async () => {
     try {
@@ -36,11 +40,17 @@ function ExamPage() {
         : null;
 
       if (fetchedAttempt?.submittedAt) {
+        if (answerStorageKey) {
+          localStorage.removeItem(answerStorageKey);
+        }
         navigate(`/result/${fetchedAttempt._id}`);
         return;
       }
 
       if (endTime && endTime <= Date.now()) {
+        if (answerStorageKey) {
+          localStorage.removeItem(answerStorageKey);
+        }
         alert("This exam attempt has already expired.");
         navigate("/dashboard");
         return;
@@ -50,6 +60,19 @@ function ExamPage() {
       setAttempt(fetchedAttempt);
       setExamDuration(durationInMinutes || null);
       setExamTitle(fetchedAttempt?.examId?.title || "Online Exam");
+
+      if (answerStorageKey) {
+        try {
+          const savedAnswers = localStorage.getItem(answerStorageKey);
+
+          if (savedAnswers) {
+            setAnswers(JSON.parse(savedAnswers));
+          }
+        } catch (storageError) {
+          console.error("Unable to restore saved answers", storageError);
+          localStorage.removeItem(answerStorageKey);
+        }
+      }
     } catch (err) {
       alert(
         err.response?.data?.message ||
@@ -59,11 +82,22 @@ function ExamPage() {
     } finally {
       setLoading(false);
     }
-  }, [examId, navigate]);
+  }, [answerStorageKey, examId, navigate]);
 
   useEffect(() => {
     fetchExamData();
   }, [fetchExamData]);
+
+  useEffect(() => {
+    if (loading || !answerStorageKey) {
+      return;
+    }
+
+    setSaveStatus("Saving");
+    localStorage.setItem(answerStorageKey, JSON.stringify(answers));
+    setLastSavedAt(new Date());
+    setSaveStatus("Saved");
+  }, [answerStorageKey, answers, loading]);
 
   const handleAnswer = (questionId, optionIndex) => {
     setAnswers((currentAnswers) => ({
@@ -96,12 +130,25 @@ function ExamPage() {
         answers: formattedAnswers,
       });
 
+      if (answerStorageKey) {
+        localStorage.removeItem(answerStorageKey);
+      }
+
       navigate(`/result/${attempt?._id}`);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to submit exam");
       setIsSubmitting(false);
     }
-  }, [answers, attempt?._id, examId, isSubmitting, logout, navigate, user?.id]);
+  }, [
+    answerStorageKey,
+    answers,
+    attempt?._id,
+    examId,
+    isSubmitting,
+    logout,
+    navigate,
+    user?.id,
+  ]);
 
   return (
     <div className="app-shell">
@@ -137,6 +184,21 @@ function ExamPage() {
                 Read each question carefully and select the best answer before
                 time runs out.
               </p>
+            </div>
+
+            <div className="exam-save-status">
+              <span
+                className={`exam-save-pill ${
+                  saveStatus === "Saved" ? "exam-save-pill-saved" : ""
+                }`}
+              >
+                {saveStatus === "Saving" ? "Saving..." : "Answers auto-saved"}
+              </span>
+              {lastSavedAt ? (
+                <span className="exam-save-time">
+                  Last saved at {lastSavedAt.toLocaleTimeString()}
+                </span>
+              ) : null}
             </div>
 
             <div className="stats-grid">

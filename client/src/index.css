@@ -1023,6 +1023,36 @@
   color: #c0392b;
 }
 
+.exam-save-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.exam-save-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #c6d7f4;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #1f57c8;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.exam-save-pill-saved {
+  border-color: #c6e7d3;
+  background: #eefbf4;
+  color: #1c7a51;
+}
+
+.exam-save-time {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .result-summary-top {
   display: flex;
   flex-direction: column;
