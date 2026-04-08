@@ -137,13 +137,46 @@ function StudentDashboard() {
                       : "Single attempt"}
                   </strong>
                 </div>
+                <div className="meta-row">
+                  <span>Used Attempts</span>
+                  <strong>
+                    {exam.usedAttempts || 0} / {exam.maxAttempts || 1}
+                  </strong>
+                </div>
+                <div className="meta-row">
+                  <span>Attempts Remaining</span>
+                  <strong>{exam.attemptsRemaining ?? exam.maxAttempts ?? 1}</strong>
+                </div>
               </div>
+
+                {exam.hasActiveAttempt ? (
+                  <p className="student-exam-note student-exam-note-active">
+                    You already have an active attempt in progress. Selecting
+                    this will resume that exam.
+                  </p>
+                ) : exam.attemptsRemaining === 0 ? (
+                  <p className="student-exam-note student-exam-note-blocked">
+                    No attempts remaining for this exam. Contact your teacher
+                    if you need another try.
+                  </p>
+                ) : (
+                  <p className="student-exam-note">
+                    {exam.allowRetakes
+                      ? `${exam.attemptsRemaining} attempt(s) remaining.`
+                      : "You have one chance to complete this exam."}
+                  </p>
+                )}
 
                 <button
                   onClick={() => startExam(exam._id)}
                   className="primary-button mt-6 w-full"
+                  disabled={!exam.hasActiveAttempt && exam.attemptsRemaining === 0}
                 >
-                  Start Exam
+                  {exam.hasActiveAttempt
+                    ? "Resume Exam"
+                    : exam.attemptsRemaining === 0
+                      ? "No Attempts Left"
+                      : "Start Exam"}
                 </button>
               </article>
             ))}

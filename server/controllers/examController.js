@@ -228,7 +228,44 @@ const getAvailableExams = async (req, res) => {
       "title description duration totalMarks examCode allowRetakes maxAttempts",
     );
 
-    res.status(200).json(exams);
+    if (req.user?.role !== "student") {
+      return res.status(200).json(exams);
+    }
+
+    const studentAttempts = await Attempt.find({
+      studentId: req.user._id,
+      examId: { $in: exams.map((exam) => exam._id) },
+    }).select("examId startedAt submittedAt attemptNumber");
+
+    const examsWithAttemptInfo = exams.map((exam) => {
+      const attemptsForExam = studentAttempts.filter(
+        (attempt) => attempt.examId.toString() === exam._id.toString(),
+      );
+      const activeAttempt = attemptsForExam.find((attempt) => {
+        if (attempt.submittedAt) {
+          return false;
+        }
+
+        const endTime =
+          new Date(attempt.startedAt).getTime() + exam.duration * 60 * 1000;
+
+        return endTime > Date.now();
+      });
+      const usedAttempts = attemptsForExam.length;
+      const maxAttempts = exam.allowRetakes ? exam.maxAttempts : 1;
+      const attemptsRemaining = Math.max(0, maxAttempts - usedAttempts);
+
+      return {
+        ...exam.toObject(),
+        usedAttempts,
+        maxAttempts,
+        attemptsRemaining,
+        hasActiveAttempt: Boolean(activeAttempt),
+        activeAttemptId: activeAttempt?._id || null,
+      };
+    });
+
+    res.status(200).json(examsWithAttemptInfo);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });

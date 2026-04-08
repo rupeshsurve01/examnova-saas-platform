@@ -845,6 +845,23 @@
     linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(246, 250, 255, 1));
 }
 
+.student-exam-note {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.student-exam-note-active {
+  color: #1f57c8;
+  font-weight: 600;
+}
+
+.student-exam-note-blocked {
+  color: #c0392b;
+  font-weight: 600;
+}
+
 .student-attempt-card {
   position: relative;
   overflow: hidden;
