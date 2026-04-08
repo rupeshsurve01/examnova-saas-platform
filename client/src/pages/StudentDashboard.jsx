@@ -18,7 +18,7 @@ function StudentDashboard() {
       : null;
 
     if (attempt?.submittedAt) {
-      return `/result/${examId}/${user.id}`;
+      return `/result/${attempt._id}`;
     }
 
     if (endTime && endTime <= Date.now()) {
@@ -125,11 +125,19 @@ function StudentDashboard() {
                     <span>Total Marks</span>
                     <strong>{exam.totalMarks}</strong>
                   </div>
-                  <div className="meta-row">
-                    <span>Exam Code</span>
-                    <strong>{exam.examCode || "N/A"}</strong>
-                  </div>
+                <div className="meta-row">
+                  <span>Exam Code</span>
+                  <strong>{exam.examCode || "N/A"}</strong>
                 </div>
+                <div className="meta-row">
+                  <span>Attempts</span>
+                  <strong>
+                    {exam.allowRetakes
+                      ? `${exam.maxAttempts || 1} allowed`
+                      : "Single attempt"}
+                  </strong>
+                </div>
+              </div>
 
                 <button
                   onClick={() => startExam(exam._id)}

@@ -2,6 +2,27 @@ const Attempt = require("../models/Attempt");
 const Question = require("../models/Question");
 const Exam = require("../models/Exam");
 
+const getAuthorizedExam = async (examId, user) => {
+  const exam = await Exam.findById(examId);
+
+  if (!exam) {
+    return { status: 404, body: { message: "Exam not found" } };
+  }
+
+  const isOrgAdmin = user?.role === "org_admin";
+  const isOwner =
+    exam.createdBy && exam.createdBy.toString() === user?._id?.toString();
+
+  if (!isOrgAdmin && !isOwner) {
+    return {
+      status: 403,
+      body: { message: "Unauthorized to modify this exam" },
+    };
+  }
+
+  return { exam };
+};
+
 const createExam = async (req, res) => {
   try {
     const {
@@ -10,6 +31,8 @@ const createExam = async (req, res) => {
       totalMarks,
       duration,
       examCode,
+      allowRetakes,
+      maxAttempts,
       organizationId,
     } = req.body;
     const createdBy = req.user._id;
@@ -37,6 +60,11 @@ const createExam = async (req, res) => {
       totalMarks,
       duration,
       examCode,
+      allowRetakes: Boolean(allowRetakes),
+      maxAttempts:
+        allowRetakes === true || allowRetakes === "true"
+          ? Number(maxAttempts) || 1
+          : 1,
       createdBy,
       organizationId: orgIdFromUser || organizationId || undefined,
     });
@@ -59,17 +87,62 @@ const publishExam = async (req, res) => {
       return res.status(400).json({ message: "Exam ID is required" });
     }
 
-    const exam = await Exam.findById(examId);
+    const authorization = await getAuthorizedExam(examId, req.user);
 
-    if (!exam) {
-      return res.status(404).json({ message: "Exam not found" });
+    if (authorization.status) {
+      return res.status(authorization.status).json(authorization.body);
     }
 
+    const { exam } = authorization;
     exam.isPublished = true;
     await exam.save();
 
     res.status(200).json({
       message: "Exam published successfully",
+      exam,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const updateExamRetakeSettings = async (req, res) => {
+  try {
+    const { examId } = req.params;
+    const { allowRetakes, maxAttempts } = req.body;
+
+    if (!examId || typeof allowRetakes !== "boolean") {
+      return res.status(400).json({
+        message: "Exam ID and allowRetakes flag are required",
+      });
+    }
+
+    const authorization = await getAuthorizedExam(examId, req.user);
+
+    if (authorization.status) {
+      return res.status(authorization.status).json(authorization.body);
+    }
+
+    const nextMaxAttempts = allowRetakes ? Number(maxAttempts) : 1;
+
+    if (
+      Number.isNaN(nextMaxAttempts) ||
+      !Number.isInteger(nextMaxAttempts) ||
+      nextMaxAttempts <= 0
+    ) {
+      return res.status(400).json({
+        message: "Maximum attempts must be a positive whole number",
+      });
+    }
+
+    const { exam } = authorization;
+    exam.allowRetakes = allowRetakes;
+    exam.maxAttempts = allowRetakes ? nextMaxAttempts : 1;
+    await exam.save();
+
+    res.status(200).json({
+      message: "Retake settings updated successfully",
       exam,
     });
   } catch (error) {
@@ -98,7 +171,11 @@ const submitExam = async (req, res) => {
       return res.status(403).json({ message: "Exam not available" });
     }
 
-    const attempt = await Attempt.findOne({ examId, studentId });
+    const attempt = await Attempt.findOne({
+      examId,
+      studentId,
+      submittedAt: null,
+    }).sort({ attemptNumber: -1, createdAt: -1 });
 
     if (!attempt) {
       return res.status(404).json({ message: "Exam not started" });
@@ -148,7 +225,7 @@ const submitExam = async (req, res) => {
 const getAvailableExams = async (req, res) => {
   try {
     const exams = await Exam.find({ isPublished: true }).select(
-      "title description duration totalMarks examCode",
+      "title description duration totalMarks examCode allowRetakes maxAttempts",
     );
 
     res.status(200).json(exams);
@@ -182,6 +259,7 @@ const getCreatedExam = async (req, res) => {
 module.exports = {
   createExam,
   publishExam,
+  updateExamRetakeSettings,
   submitExam,
   getAvailableExams,
   getCreatedExam,

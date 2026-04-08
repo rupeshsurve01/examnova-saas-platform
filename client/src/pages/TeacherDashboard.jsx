@@ -9,33 +9,39 @@ const TeacherDashboard = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [editingRetakeExamId, setEditingRetakeExamId] = useState(null);
+  const [retakeForm, setRetakeForm] = useState({
+    allowRetakes: false,
+    maxAttempts: "1",
+  });
+  const [savingRetakeId, setSavingRetakeId] = useState(null);
+
+  const fetchTeacherExams = async () => {
+    if (!user?.id) {
+      setLoading(false);
+      setErrorMessage("Please log in again to access your exams.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setErrorMessage("");
+      const response = await API.get(`/exams/teacher/${user.id}`);
+      setExams(response.data);
+    } catch (error) {
+      const message = error.response?.data?.message;
+
+      if (message === "Exams Not Found") {
+        setExams([]);
+      } else {
+        setErrorMessage(message || "Unable to load your created exams.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTeacherExams = async () => {
-      if (!user?.id) {
-        setLoading(false);
-        setErrorMessage("Please log in again to access your exams.");
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setErrorMessage("");
-        const response = await API.get(`/exams/teacher/${user.id}`);
-        setExams(response.data);
-      } catch (error) {
-        const message = error.response?.data?.message;
-
-        if (message === "Exams Not Found") {
-          setExams([]);
-        } else {
-          setErrorMessage(message || "Unable to load your created exams.");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTeacherExams();
   }, [user?.id]);
 
@@ -51,6 +57,57 @@ const TeacherDashboard = () => {
     navigate(`/teacher-results/${examId}`);
   };
 
+  const handleOpenRetakeSettings = (exam) => {
+    setEditingRetakeExamId(exam._id);
+    setRetakeForm({
+      allowRetakes: Boolean(exam.allowRetakes),
+      maxAttempts: String(exam.maxAttempts || 1),
+    });
+  };
+
+  const handleCancelRetakeSettings = () => {
+    setEditingRetakeExamId(null);
+    setRetakeForm({
+      allowRetakes: false,
+      maxAttempts: "1",
+    });
+  };
+
+  const handleSaveRetakeSettings = async (examId) => {
+    const nextMaxAttempts = retakeForm.allowRetakes
+      ? Number(retakeForm.maxAttempts)
+      : 1;
+
+    if (
+      Number.isNaN(nextMaxAttempts) ||
+      !Number.isInteger(nextMaxAttempts) ||
+      nextMaxAttempts <= 0
+    ) {
+      alert("Maximum attempts must be a positive whole number.");
+      return;
+    }
+
+    try {
+      setSavingRetakeId(examId);
+      const response = await API.patch(`/exams/${examId}/retake-settings`, {
+        allowRetakes: retakeForm.allowRetakes,
+        maxAttempts: nextMaxAttempts,
+      });
+
+      setExams((currentExams) =>
+        currentExams.map((exam) =>
+          exam._id === examId ? response.data.exam : exam,
+        ),
+      );
+      handleCancelRetakeSettings();
+    } catch (error) {
+      alert(
+        error.response?.data?.message || "Unable to update retake settings.",
+      );
+    } finally {
+      setSavingRetakeId(null);
+    }
+  };
 
   const recentExamCode =
     exams.find((exam) => exam.examCode)?.examCode || "Not assigned";
@@ -75,10 +132,7 @@ const TeacherDashboard = () => {
             <p className="stat-label">Latest Exam Code</p>
             <p className="teacher-badge-value">{recentExamCode}</p>
           </div>
-          
-        </div><div className="stats-grid">Total Attempts</div>
-        <div className="stats-grid">Highest Score</div>
-        <div className="stats-grid">Average Score</div>
+        </div>
 
         <div className="stats-grid">
           <div className="stat-box teacher-stat-box">
@@ -152,7 +206,89 @@ const TeacherDashboard = () => {
                     <span>Publish Status</span>
                     <strong>{exam.isPublished ? "Published" : "Draft"}</strong>
                   </div>
+                  <div className="meta-row">
+                    <span>Retake Policy</span>
+                    <strong>
+                      {exam.allowRetakes
+                        ? `${exam.maxAttempts || 1} attempts allowed`
+                        : "Single attempt only"}
+                    </strong>
+                  </div>
                 </div>
+
+                {editingRetakeExamId === exam._id ? (
+                  <div className="teacher-retake-editor">
+                    <div className="teacher-retake-editor-header">
+                      <div>
+                        <h3 className="section-title">Retake settings</h3>
+                        <p className="section-subtitle">
+                          Update whether students can retry this exam later.
+                        </p>
+                      </div>
+                    </div>
+
+                    <label className="teacher-retake-toggle">
+                      <input
+                        type="checkbox"
+                        checked={retakeForm.allowRetakes}
+                        onChange={(event) =>
+                          setRetakeForm((current) => ({
+                            ...current,
+                            allowRetakes: event.target.checked,
+                            maxAttempts: event.target.checked
+                              ? current.maxAttempts || "2"
+                              : "1",
+                          }))
+                        }
+                        disabled={savingRetakeId === exam._id}
+                      />
+                      <span>Allow retakes for this exam</span>
+                    </label>
+
+                    <div className="teacher-retake-field">
+                      <label className="field-label" htmlFor={`max-${exam._id}`}>
+                        Maximum Attempts
+                      </label>
+                      <input
+                        id={`max-${exam._id}`}
+                        type="number"
+                        min="1"
+                        className="form-input"
+                        value={retakeForm.maxAttempts}
+                        onChange={(event) =>
+                          setRetakeForm((current) => ({
+                            ...current,
+                            maxAttempts: event.target.value,
+                          }))
+                        }
+                        disabled={
+                          savingRetakeId === exam._id || !retakeForm.allowRetakes
+                        }
+                      />
+                    </div>
+
+                    <div className="teacher-retake-actions">
+                      <button
+                        type="button"
+                        className="primary-button"
+                        onClick={() => handleSaveRetakeSettings(exam._id)}
+                        disabled={savingRetakeId === exam._id}
+                      >
+                        {savingRetakeId === exam._id
+                          ? "Saving..."
+                          : "Save Retake Settings"}
+                      </button>
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={handleCancelRetakeSettings}
+                        disabled={savingRetakeId === exam._id}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
 
                 <div className="teacher-card-actions">
                   <button
@@ -170,12 +306,15 @@ const TeacherDashboard = () => {
                   </button>
 
                   <button
-                    onClick={handleCreateExam}
+                    onClick={() => handleOpenRetakeSettings(exam)}
                     className="secondary-button"
                   >
+                    Retake Settings
+                  </button>
+
+                  <button onClick={handleCreateExam} className="secondary-button">
                     Create Another
                   </button>
-                  
                 </div>
               </article>
             ))}

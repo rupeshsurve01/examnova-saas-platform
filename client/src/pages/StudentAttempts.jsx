@@ -318,6 +318,10 @@ const StudentAttempts = () => {
 
               <div className="exam-card-meta mt-5">
                 <div className="meta-row">
+                  <span>Attempt</span>
+                  <strong>Attempt #{attempt.attemptNumber || 1}</strong>
+                </div>
+                <div className="meta-row">
                   <span>Exam Code</span>
                   <strong>{attempt.examId?.examCode || "No Code"}</strong>
                 </div>
@@ -346,9 +350,9 @@ const StudentAttempts = () => {
                     return;
                   }
 
-                  navigate(`/result/${attempt.examId._id}/${user.id}`);
+                  navigate(`/result/${attempt._id}`);
                 }}
-                disabled={!attempt.examId?._id}
+                disabled={!attempt._id}
               >
                 View Result
               </button>

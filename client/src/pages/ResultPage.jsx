@@ -5,7 +5,7 @@ import API from "../services/api";
 const optionLabels = ["A", "B", "C", "D", "E", "F"];
 
 function ResultPage() {
-  const { examId, studentId } = useParams();
+  const { attemptId } = useParams();
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -17,7 +17,7 @@ function ResultPage() {
   useEffect(() => {
     const fetchResult = async () => {
       try {
-        const res = await API.get(`/exams/${examId}/result/${studentId}`);
+        const res = await API.get(`/exams/attempts/${attemptId}/result`);
         setResult(res.data);
       } catch (err) {
         setErrorMessage(
@@ -29,7 +29,7 @@ function ResultPage() {
     };
 
     fetchResult();
-  }, [examId, studentId]);
+  }, [attemptId]);
 
   const correctAnswersCount =
     result?.reviewQuestions?.filter((question) => question.isCorrect).length ||
@@ -82,8 +82,8 @@ function ResultPage() {
           <span className="student-kicker">Result Center</span>
           <h1 className="page-title">{result.examTitle || "Result Summary"}</h1>
           <p className="page-subtitle">
-            Review your score, exam details, and every answer from this
-            submission.
+            Review your score, exam details, and every answer from attempt #
+            {result.attemptNumber || 1}.
           </p>
         </div>
 

@@ -36,7 +36,7 @@ function ExamPage() {
         : null;
 
       if (fetchedAttempt?.submittedAt) {
-        navigate(`/result/${examId}/${user?.id || fetchedAttempt.studentId}`);
+        navigate(`/result/${fetchedAttempt._id}`);
         return;
       }
 
@@ -96,12 +96,12 @@ function ExamPage() {
         answers: formattedAnswers,
       });
 
-      navigate(`/result/${examId}/${user.id}`);
+      navigate(`/result/${attempt?._id}`);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to submit exam");
       setIsSubmitting(false);
     }
-  }, [answers, examId, isSubmitting, logout, navigate, user?.id]);
+  }, [answers, attempt?._id, examId, isSubmitting, logout, navigate, user?.id]);
 
   return (
     <div className="app-shell">
@@ -112,7 +112,7 @@ function ExamPage() {
               <div className="brand">ExamNova</div>
               <p className="text-sm text-[var(--muted)]">
                 {attempt?.examId?.examCode
-                  ? `Exam interface • ${attempt.examId.examCode}`
+                  ? `Exam interface | ${attempt.examId.examCode}`
                   : "Exam interface"}
               </p>
             </div>

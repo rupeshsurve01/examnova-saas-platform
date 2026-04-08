@@ -34,6 +34,13 @@ const AttemptSchema = new mongoose.Schema(
       default: 0,
     },
 
+    attemptNumber: {
+      type: Number,
+      required: true,
+      default: 1,
+      min: 1,
+    },
+
     startedAt: {
       type: Date,
       default: Date.now,

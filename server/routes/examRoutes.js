@@ -2,6 +2,7 @@ const express = require("express");
 const {
   createExam,
   publishExam,
+  updateExamRetakeSettings,
   getAvailableExams,
   submitExam,
   getCreatedExam
@@ -15,7 +16,6 @@ const {
 } = require("../controllers/questionController");
 
 const {
-  attemptedQuestions,
   getStudentResult,
   getExamAttempts,
   startExam,
@@ -37,6 +37,7 @@ router.post("/create", protect, authorize("teacher", "org_admin"), createExam);
 
 // ---------- EXAM ACTIONS ----------
 router.patch("/:examId/publish", protect, authorize("teacher", "org_admin"), publishExam);
+router.patch("/:examId/retake-settings", protect, authorize("teacher", "org_admin"), updateExamRetakeSettings);
 router.post("/:examId/start", protect, authorize("student"), startExam);
 router.post("/:examId/submit", protect, authorize("student"), submitExam);
 
@@ -48,7 +49,7 @@ router.put("/questions/:questionId", protect, authorize("teacher", "org_admin"),
 router.delete("/questions/:questionId", protect, authorize("teacher", "org_admin"), deleteQuestion);
 
 // ---------- RESULTS ----------
-router.get("/:examId/result/:studentId", protect, getStudentResult);
+router.get("/attempts/:attemptId/result", protect, getStudentResult);
 router.get("/:examId/attempts", protect, authorize("teacher", "org_admin"), getExamAttempts);
 
 module.exports = router;

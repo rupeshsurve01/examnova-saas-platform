@@ -42,6 +42,17 @@ const ExamSchema = new mongoose.Schema(
       trim: true,
     },
 
+    allowRetakes: {
+      type: Boolean,
+      default: false,
+    },
+
+    maxAttempts: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
+
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Organization",

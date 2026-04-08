@@ -2,27 +2,29 @@ const Attempt = require("../models/Attempt");
 const Exam = require("../models/Exam");
 const Question = require("../models/Question");
 
-
 const getStudentResult = async (req, res) => {
   try {
-    const { examId, studentId } = req.params;
-    const requestedStudentId =
-      req.user.role === "student" ? req.user._id.toString() : studentId;
+    const { attemptId } = req.params;
 
-    if (!examId || !studentId) {
-      return res.status(400).json({ message: "Exam or Student ID required" });
+    if (!attemptId) {
+      return res.status(400).json({ message: "Attempt ID required" });
     }
 
-    const result = await Attempt.findOne({
-      examId,
-      studentId: requestedStudentId,
-    });
+    const result = await Attempt.findById(attemptId);
 
     if (!result) {
       return res.status(404).json({ message: "Result not found" });
     }
 
-    const exam = await Exam.findById(examId).select(
+    const isStudentOwner =
+      req.user.role === "student" &&
+      result.studentId.toString() === req.user._id.toString();
+
+    if (req.user.role === "student" && !isStudentOwner) {
+      return res.status(403).json({ message: "Unauthorized to view result" });
+    }
+
+    const exam = await Exam.findById(result.examId).select(
       "title examCode duration totalMarks",
     );
 
@@ -30,7 +32,9 @@ const getStudentResult = async (req, res) => {
       return res.status(404).json({ message: "Exam not found" });
     }
 
-    const questions = await Question.find({ examId }).sort({ createdAt: 1 });
+    const questions = await Question.find({ examId: exam._id }).sort({
+      createdAt: 1,
+    });
     const answersByQuestionId = new Map(
       result.answers.map((answer) => [
         answer.questionId.toString(),
@@ -58,6 +62,8 @@ const getStudentResult = async (req, res) => {
     });
 
     res.status(200).json({
+      attemptId: result._id,
+      attemptNumber: result.attemptNumber,
       examId: exam._id,
       examTitle: exam.title,
       examCode: exam.examCode,
@@ -83,14 +89,17 @@ const getExamAttempts = async (req, res) => {
       return res.status(400).json({ message: "Exam Id Required" });
     }
 
-    const attempts = await Attempt.find({ examId }).populate("studentId");
+    const attempts = await Attempt.find({ examId })
+      .populate("studentId")
+      .sort({ attemptNumber: -1, createdAt: -1 });
 
     if (attempts.length === 0) {
-      return res.status(404).json({ message: "No attempts found for this exam" });
+      return res
+        .status(404)
+        .json({ message: "No attempts found for this exam" });
     }
 
     res.status(200).json(attempts);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -99,24 +108,25 @@ const getExamAttempts = async (req, res) => {
 
 const getStudentAttempts = async (req, res) => {
   try {
-    const studentId = req.user.role === "student"
-      ? req.user._id
-      : req.params.studentId;
+    const studentId =
+      req.user.role === "student" ? req.user._id : req.params.studentId;
 
     if (!studentId) {
       return res.status(400).json({ message: "Student ID required" });
     }
 
-    const attempts = await Attempt
-      .find({ studentId })
-      .populate("examId", "title examCode duration");
+    const attempts = await Attempt.find({ studentId })
+      .populate(
+        "examId",
+        "title examCode duration allowRetakes maxAttempts totalMarks",
+      )
+      .sort({ createdAt: -1 });
 
     if (attempts.length === 0) {
       return res.status(404).json({ message: "No attempts found" });
     }
 
     res.status(200).json(attempts);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -125,12 +135,13 @@ const getStudentAttempts = async (req, res) => {
 
 const startExam = async (req, res) => {
   try {
-
     const { examId } = req.params;
-const studentId = req.user._id;
+    const studentId = req.user._id;
 
     if (!examId || !studentId) {
-      return res.status(400).json({ message: "ExamId and studentId required" });
+      return res
+        .status(400)
+        .json({ message: "ExamId and studentId required" });
     }
 
     const exam = await Exam.findById(examId);
@@ -143,23 +154,54 @@ const studentId = req.user._id;
       return res.status(403).json({ message: "Exam not available" });
     }
 
-    const existingAttempt = await Attempt.findOne({ examId, studentId });
+    const studentAttempts = await Attempt.find({ examId, studentId }).sort({
+      attemptNumber: -1,
+      createdAt: -1,
+    });
+    const activeAttempt = studentAttempts.find((attempt) => !attempt.submittedAt);
 
-    if (existingAttempt) {
-      return res.status(400).json({ message: "Exam already started" });
+    if (activeAttempt) {
+      const elapsedMinutes =
+        (Date.now() - new Date(activeAttempt.startedAt).getTime()) / 60000;
+
+      if (elapsedMinutes <= exam.duration) {
+        return res.status(400).json({
+          message: "Exam already started",
+          attempt: activeAttempt,
+        });
+      }
     }
+
+    const completedOrExpiredAttempts = studentAttempts.length;
+
+    if (!exam.allowRetakes && completedOrExpiredAttempts > 0) {
+      return res
+        .status(403)
+        .json({ message: "Retakes are not allowed for this exam" });
+    }
+
+    if (completedOrExpiredAttempts >= exam.maxAttempts) {
+      return res.status(403).json({
+        message: `Maximum attempts reached for this exam (${exam.maxAttempts})`,
+      });
+    }
+
+    const nextAttemptNumber =
+      studentAttempts.length > 0
+        ? Math.max(...studentAttempts.map((attempt) => attempt.attemptNumber)) + 1
+        : 1;
 
     const attempt = await Attempt.create({
       examId,
       studentId,
-      startedAt: new Date()
+      attemptNumber: nextAttemptNumber,
+      startedAt: new Date(),
     });
 
     res.status(201).json({
       message: "Exam started",
-      attempt
+      attempt,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -172,19 +214,25 @@ const getStudentExamAttempt = async (req, res) => {
     const studentId = req.user._id;
 
     if (!examId || !studentId) {
-      return res.status(400).json({ message: "ExamId and studentId required" });
+      return res
+        .status(400)
+        .json({ message: "ExamId and studentId required" });
     }
 
-    const attempt = await Attempt.findOne({ examId, studentId }).populate(
-      "examId",
-      "title duration examCode",
-    );
+    const attempts = await Attempt.find({ examId, studentId })
+      .populate("examId", "title duration examCode allowRetakes maxAttempts")
+      .sort({ attemptNumber: -1, createdAt: -1 });
 
-    if (!attempt) {
-      return res.status(404).json({ message: "No attempt found for this exam" });
+    if (attempts.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No attempt found for this exam" });
     }
 
-    res.status(200).json(attempt);
+    const activeAttempt = attempts.find((attempt) => !attempt.submittedAt);
+    const latestAttempt = activeAttempt || attempts[0];
+
+    res.status(200).json(latestAttempt);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -196,5 +244,5 @@ module.exports = {
   getExamAttempts,
   getStudentAttempts,
   startExam,
-  getStudentExamAttempt
+  getStudentExamAttempt,
 };

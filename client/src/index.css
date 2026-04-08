@@ -406,6 +406,46 @@
     gap: 12px;
     margin-top: 24px;
   }
+
+  .teacher-retake-editor {
+    display: grid;
+    gap: 16px;
+    margin-top: 20px;
+    border: 1px solid #d7e4fb;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+    padding: 18px;
+  }
+
+  .teacher-retake-editor-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .teacher-retake-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .teacher-retake-toggle input {
+    width: 18px;
+    height: 18px;
+  }
+
+  .teacher-retake-field {
+    max-width: 220px;
+  }
+
+  .teacher-retake-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
 }
 
 @media (min-width: 768px) {

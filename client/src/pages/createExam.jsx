@@ -9,6 +9,8 @@ const createInitialForm = () => ({
   duration: "60",
   totalMarks: "100",
   examCode: "",
+  allowRetakes: false,
+  maxAttempts: "1",
 });
 
 const generateExamCode = () =>
@@ -41,16 +43,23 @@ function CreateExam() {
         label: "Status",
         value: "Draft",
       },
+      {
+        label: "Attempts",
+        value: formData.allowRetakes
+          ? `${formData.maxAttempts || "1"} allowed`
+          : "Single attempt",
+      },
     ],
-    [formData.duration, formData.totalMarks],
+    [formData.allowRetakes, formData.duration, formData.maxAttempts, formData.totalMarks],
   );
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const { name, value, type, checked } = event.target;
 
     setFormData((current) => ({
       ...current,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
+      ...(name === "allowRetakes" && !checked ? { maxAttempts: "1" } : {}),
     }));
   };
 
@@ -71,6 +80,8 @@ function CreateExam() {
       duration: Number(formData.duration),
       totalMarks: Number(formData.totalMarks),
       examCode: formData.examCode.trim().toUpperCase(),
+      allowRetakes: formData.allowRetakes,
+      maxAttempts: formData.allowRetakes ? Number(formData.maxAttempts) : 1,
     };
 
     if (
@@ -80,10 +91,12 @@ function CreateExam() {
       Number.isNaN(payload.duration) ||
       payload.duration <= 0 ||
       Number.isNaN(payload.totalMarks) ||
-      payload.totalMarks <= 0
+      payload.totalMarks <= 0 ||
+      Number.isNaN(payload.maxAttempts) ||
+      payload.maxAttempts <= 0
     ) {
       setErrorMessage(
-        "Enter a title, description, exam code, and valid positive numbers for duration and total marks.",
+        "Enter a title, description, exam code, and valid positive numbers for duration, total marks, and allowed attempts.",
       );
       return;
     }
@@ -241,6 +254,47 @@ function CreateExam() {
               </div>
             </div>
 
+            <div className="rounded-2xl border border-[#d7e4fb] bg-[#f8fbff] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <label htmlFor="allowRetakes" className="field-label mb-0">
+                    Allow Retakes
+                  </label>
+                  <p className="section-subtitle mt-1">
+                    Enable this if students should be allowed to attempt the
+                    same exam more than once.
+                  </p>
+                </div>
+                <label className="flex items-center gap-3 text-sm font-semibold text-[var(--text)]">
+                  <input
+                    id="allowRetakes"
+                    name="allowRetakes"
+                    type="checkbox"
+                    checked={formData.allowRetakes}
+                    onChange={handleChange}
+                    disabled={submitting}
+                  />
+                  Allow
+                </label>
+              </div>
+
+              <div className="mt-4 md:max-w-xs">
+                <label htmlFor="maxAttempts" className="field-label">
+                  Maximum Attempts
+                </label>
+                <input
+                  id="maxAttempts"
+                  name="maxAttempts"
+                  type="number"
+                  min="1"
+                  className="form-input"
+                  value={formData.maxAttempts}
+                  onChange={handleChange}
+                  disabled={submitting || !formData.allowRetakes}
+                />
+              </div>
+            </div>
+
             <div>
               <label htmlFor="examCode" className="field-label">
                 Exam Code
@@ -370,6 +424,14 @@ function CreateExam() {
                 <div className="meta-row">
                   <span>Publish Status</span>
                   <strong>Draft</strong>
+                </div>
+                <div className="meta-row">
+                  <span>Retakes</span>
+                  <strong>
+                    {formData.allowRetakes
+                      ? `${formData.maxAttempts || "1"} attempts`
+                      : "Single attempt only"}
+                  </strong>
                 </div>
               </div>
             </div>
