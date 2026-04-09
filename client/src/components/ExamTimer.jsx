@@ -61,16 +61,25 @@ function ExamTimer({ startedAt, duration, onTimeUp }) {
   }, [endTime, onTimeUp]);
 
   const warningClass =
-    remainingSeconds <= 300
+    remainingSeconds <= 60
       ? "exam-timer-critical"
-      : remainingSeconds <= 900
+      : remainingSeconds <= 300
         ? "exam-timer-warning"
+        : "";
+  const warningMessage =
+    remainingSeconds <= 60
+      ? "Final minute. Submit soon."
+      : remainingSeconds <= 300
+        ? "Less than 5 minutes remaining."
         : "";
 
   return (
     <div className={`exam-timer ${warningClass}`.trim()}>
       <p className="exam-timer-label">Time Remaining</p>
       <p className="exam-timer-value">{formatRemaining(remainingSeconds)}</p>
+      {warningMessage ? (
+        <p className="exam-timer-warning-text">{warningMessage}</p>
+      ) : null}
     </div>
   );
 }

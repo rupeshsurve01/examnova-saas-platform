@@ -1004,6 +1004,16 @@
   color: #1f57c8;
 }
 
+.exam-timer-warning-text {
+  margin-top: 6px;
+  max-width: 160px;
+  text-align: right;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
 .exam-timer-warning {
   border-color: #f4c98d;
   background: linear-gradient(180deg, #fffaf1 0%, #fff2d8 100%);
@@ -1011,6 +1021,10 @@
 
 .exam-timer-warning .exam-timer-value {
   color: #b45309;
+}
+
+.exam-timer-warning .exam-timer-warning-text {
+  color: #92400e;
 }
 
 .exam-timer-critical {
@@ -1021,6 +1035,10 @@
 
 .exam-timer-critical .exam-timer-value {
   color: #c0392b;
+}
+
+.exam-timer-critical .exam-timer-warning-text {
+  color: #b91c1c;
 }
 
 .exam-save-status {
