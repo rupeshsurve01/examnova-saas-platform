@@ -8,6 +8,9 @@ const TeacherResults = () => {
   const [attempts, setAttempts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [studentSortBy, setStudentSortBy] = useState("bestScore");
+  const [attemptFilter, setAttemptFilter] = useState("all");
 
   const fetchResults = async () => {
     try {
@@ -64,6 +67,7 @@ const TeacherResults = () => {
           totalAttempts: 0,
           bestScore: score,
           latestScore: score,
+          latestAttemptId: attempt._id,
           averageScoreTotal: 0,
           latestSubmittedAt: attempt.submittedAt || null,
           latestSubmittedTime: submittedTime,
@@ -81,6 +85,7 @@ const TeacherResults = () => {
         analytics[studentId].latestSubmittedTime = submittedTime;
         analytics[studentId].latestSubmittedAt = attempt.submittedAt || null;
         analytics[studentId].latestScore = score;
+        analytics[studentId].latestAttemptId = attempt._id;
       }
 
       return analytics;
@@ -92,17 +97,67 @@ const TeacherResults = () => {
         1,
       ),
     }))
+    .sort((first, second) => first.studentName.localeCompare(second.studentName));
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const filteredStudentAnalytics = studentAnalytics
+    .filter((student) =>
+      normalizedSearchQuery
+        ? student.studentName.toLowerCase().includes(normalizedSearchQuery)
+        : true,
+    )
     .sort((first, second) => {
-      if (second.bestScore !== first.bestScore) {
-        return second.bestScore - first.bestScore;
+      if (studentSortBy === "averageScore") {
+        const averageDelta =
+          Number(second.averageScore) - Number(first.averageScore);
+        if (averageDelta !== 0) {
+          return averageDelta;
+        }
       }
 
-      if (second.totalAttempts !== first.totalAttempts) {
-        return second.totalAttempts - first.totalAttempts;
+      if (studentSortBy === "totalAttempts") {
+        if (second.totalAttempts !== first.totalAttempts) {
+          return second.totalAttempts - first.totalAttempts;
+        }
+      }
+
+      if (studentSortBy === "latestSubmission") {
+        if (second.latestSubmittedTime !== first.latestSubmittedTime) {
+          return second.latestSubmittedTime - first.latestSubmittedTime;
+        }
+      }
+
+      if (studentSortBy === "bestScore") {
+        if (second.bestScore !== first.bestScore) {
+          return second.bestScore - first.bestScore;
+        }
       }
 
       return first.studentName.localeCompare(second.studentName);
     });
+  const filteredAttempts = attempts.filter((attempt) => {
+    const studentName = attempt.studentId?.name?.toLowerCase() || "";
+    const matchesSearch = normalizedSearchQuery
+      ? studentName.includes(normalizedSearchQuery)
+      : true;
+
+    if (!matchesSearch) {
+      return false;
+    }
+
+    if (attemptFilter === "submitted") {
+      return Boolean(attempt.submittedAt);
+    }
+
+    if (attemptFilter === "latestOnly") {
+      const matchingStudent = filteredStudentAnalytics.find(
+        (student) => student.studentId === (attempt.studentId?._id || `unknown-${attempt._id}`),
+      );
+
+      return matchingStudent ? matchingStudent.latestAttemptId === attempt._id : false;
+    }
+
+    return true;
+  });
 
   if (loading) {
     return (
@@ -200,6 +255,63 @@ const TeacherResults = () => {
 
       <section className="teacher-page-section">
         <div className="panel p-6">
+          <div className="teacher-results-toolbar">
+            <div className="teacher-results-toolbar-group teacher-results-toolbar-search">
+              <label className="field-label" htmlFor="teacher-results-search">
+                Search Student
+              </label>
+              <input
+                id="teacher-results-search"
+                type="text"
+                className="form-input"
+                placeholder="Search by student name"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+              />
+            </div>
+
+            <div className="teacher-results-toolbar-group">
+              <label className="field-label" htmlFor="teacher-results-sort">
+                Sort Analytics
+              </label>
+              <select
+                id="teacher-results-sort"
+                className="form-input"
+                value={studentSortBy}
+                onChange={(event) => setStudentSortBy(event.target.value)}
+              >
+                <option value="bestScore">Best Score</option>
+                <option value="averageScore">Average Score</option>
+                <option value="totalAttempts">Most Attempts</option>
+                <option value="latestSubmission">Latest Submission</option>
+              </select>
+            </div>
+
+            <div className="teacher-results-toolbar-group">
+              <label className="field-label" htmlFor="teacher-results-filter">
+                Filter Attempts
+              </label>
+              <select
+                id="teacher-results-filter"
+                className="form-input"
+                value={attemptFilter}
+                onChange={(event) => setAttemptFilter(event.target.value)}
+              >
+                <option value="all">All Attempts</option>
+                <option value="submitted">Submitted Only</option>
+                <option value="latestOnly">Latest Attempt Only</option>
+              </select>
+            </div>
+          </div>
+
+          <p className="teacher-results-toolbar-summary">
+            Showing {filteredStudentAnalytics.length} students and{" "}
+            {filteredAttempts.length} attempts from {attempts.length} recorded
+            attempts.
+          </p>
+        </div>
+
+        <div className="panel p-6">
           <div>
             <h2 className="section-title">Student analytics</h2>
             <p className="section-subtitle">
@@ -208,17 +320,16 @@ const TeacherResults = () => {
             </p>
           </div>
 
-          {studentAnalytics.length === 0 ? (
+          {filteredStudentAnalytics.length === 0 ? (
             <div className="panel teacher-empty-state mt-6 p-8 text-center">
-              <h3 className="section-title">No student analytics yet</h3>
+              <h3 className="section-title">No matching students</h3>
               <p className="section-subtitle">
-                Analytics will appear here once students start submitting
-                attempts.
+                Try a different search term or sorting combination.
               </p>
             </div>
           ) : (
             <div className="teacher-analytics-grid mt-6">
-              {studentAnalytics.map((student) => (
+              {filteredStudentAnalytics.map((student) => (
                 <article
                   key={student.studentId}
                   className="teacher-analytics-card"
@@ -277,11 +388,11 @@ const TeacherResults = () => {
             </p>
           </div>
 
-          {attempts.length === 0 ? (
+          {filteredAttempts.length === 0 ? (
             <div className="panel teacher-empty-state mt-6 p-8 text-center">
-              <h3 className="section-title">No attempts yet</h3>
+              <h3 className="section-title">No matching attempts</h3>
               <p className="section-subtitle">
-                No students have attempted this exam yet.
+                Adjust the filter or search to see more attempt records.
               </p>
             </div>
           ) : (
@@ -296,7 +407,7 @@ const TeacherResults = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {attempts.map((attempt) => (
+                  {filteredAttempts.map((attempt) => (
                     <tr key={attempt._id}>
                       <td>Attempt #{attempt.attemptNumber || 1}</td>
                       <td>{attempt.studentId?.name || "Unknown Student"}</td>

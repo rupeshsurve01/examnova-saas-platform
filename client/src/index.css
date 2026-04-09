@@ -488,6 +488,11 @@
   .teacher-analytics-metric-wide {
     grid-column: 1 / -1;
   }
+
+  .teacher-results-toolbar {
+    grid-template-columns: minmax(240px, 1.5fr) repeat(2, minmax(180px, 0.8fr));
+    align-items: end;
+  }
 }
 
 @media (min-width: 900px) {
@@ -810,6 +815,26 @@
 .teacher-analytics-metric-date {
   font-size: 0.96rem;
   line-height: 1.5;
+}
+
+.teacher-results-toolbar {
+  display: grid;
+  gap: 16px;
+}
+
+.teacher-results-toolbar-group {
+  display: grid;
+  gap: 8px;
+}
+
+.teacher-results-toolbar-search {
+  min-width: 0;
+}
+
+.teacher-results-toolbar-summary {
+  margin-top: 18px;
+  color: var(--muted);
+  line-height: 1.6;
 }
 
 .student-layout {
