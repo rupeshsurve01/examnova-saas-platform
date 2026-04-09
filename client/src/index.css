@@ -476,6 +476,18 @@
   .teacher-card-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .teacher-analytics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .teacher-analytics-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .teacher-analytics-metric-wide {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (min-width: 900px) {
@@ -721,6 +733,83 @@
 
 .teacher-results-table tbody tr:hover {
   background: #f7faff;
+}
+
+.teacher-stat-value-compact {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.teacher-analytics-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.teacher-analytics-card {
+  border: 1px solid #d9e5f7;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(47, 111, 237, 0.08), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+  padding: 20px;
+  box-shadow: 0 14px 28px rgba(47, 111, 237, 0.08);
+}
+
+.teacher-analytics-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.teacher-analytics-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.teacher-analytics-subtitle {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.teacher-analytics-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #e7f0ff;
+  color: #1f57c8;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.teacher-analytics-metrics {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.teacher-analytics-metric {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #dde7f8;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 14px;
+}
+
+.teacher-analytics-metric-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.teacher-analytics-metric-date {
+  font-size: 0.96rem;
+  line-height: 1.5;
 }
 
 .student-layout {
