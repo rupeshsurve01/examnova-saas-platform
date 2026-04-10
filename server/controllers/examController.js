@@ -93,7 +93,26 @@ const getExamById = async (req, res) => {
       return res.status(authorization.status).json(authorization.body);
     }
 
-    return res.status(200).json(authorization.exam);
+    const { exam } = authorization;
+    const attempts = await Attempt.find({ examId }).select(
+      "studentId attemptNumber submittedAt",
+    );
+    const uniqueStudents = new Set(
+      attempts.map((attempt) => attempt.studentId?.toString()).filter(Boolean),
+    ).size;
+    const maxAttemptNumber = attempts.reduce((highest, attempt) => {
+      const nextAttemptNumber = Number(attempt.attemptNumber) || 1;
+      return nextAttemptNumber > highest ? nextAttemptNumber : highest;
+    }, 0);
+
+    return res.status(200).json({
+      ...exam.toObject(),
+      attemptInsights: {
+        totalAttempts: attempts.length,
+        uniqueStudents,
+        maxAttemptNumber,
+      },
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server Error" });

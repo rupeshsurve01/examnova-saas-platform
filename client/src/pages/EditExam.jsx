@@ -24,6 +24,12 @@ function EditExam() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [originalExam, setOriginalExam] = useState(null);
+  const [attemptInsights, setAttemptInsights] = useState({
+    totalAttempts: 0,
+    uniqueStudents: 0,
+    maxAttemptNumber: 0,
+  });
 
   const examSummary = useMemo(
     () => [
@@ -63,6 +69,23 @@ function EditExam() {
         const response = await API.get(`/exams/${examId}`);
         const exam = response.data;
 
+        setOriginalExam({
+          title: exam.title || "",
+          description: exam.description || "",
+          duration: Number(exam.duration || 60),
+          totalMarks: Number(exam.totalMarks || 100),
+          examCode: exam.examCode || "",
+          allowRetakes: Boolean(exam.allowRetakes),
+          maxAttempts: Number(exam.maxAttempts || 1),
+          isPublished: Boolean(exam.isPublished),
+        });
+        setAttemptInsights(
+          exam.attemptInsights || {
+            totalAttempts: 0,
+            uniqueStudents: 0,
+            maxAttemptNumber: 0,
+          },
+        );
         setFormData({
           title: exam.title || "",
           description: exam.description || "",
@@ -135,12 +158,58 @@ function EditExam() {
       return;
     }
 
+    const riskyChanges = [];
+    const hasAttemptHistory = attemptInsights.totalAttempts > 0;
+
+    if (hasAttemptHistory && originalExam) {
+      if (payload.duration !== originalExam.duration) {
+        riskyChanges.push("duration");
+      }
+
+      if (payload.totalMarks !== originalExam.totalMarks) {
+        riskyChanges.push("total marks");
+      }
+
+      if (payload.allowRetakes !== originalExam.allowRetakes) {
+        riskyChanges.push("retake policy");
+      }
+
+      if (payload.maxAttempts !== originalExam.maxAttempts) {
+        riskyChanges.push("maximum attempts");
+      }
+
+      if (payload.maxAttempts < attemptInsights.maxAttemptNumber) {
+        riskyChanges.push(
+          `maximum attempts below the already recorded attempt count (${attemptInsights.maxAttemptNumber})`,
+        );
+      }
+    }
+
+    if (hasAttemptHistory && riskyChanges.length > 0) {
+      const warningMessage = `This exam already has ${attemptInsights.totalAttempts} recorded attempts from ${attemptInsights.uniqueStudents} student${attemptInsights.uniqueStudents === 1 ? "" : "s"}.\n\nYou are changing: ${riskyChanges.join(", ")}.\n\nDo you want to save these changes anyway?`;
+
+      if (!window.confirm(warningMessage)) {
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
       setErrorMessage("");
       setSuccessMessage("");
 
-      await API.patch(`/exams/${examId}`, payload);
+      const response = await API.patch(`/exams/${examId}`, payload);
+      const updatedExam = response.data.exam;
+      setOriginalExam({
+        title: updatedExam.title || "",
+        description: updatedExam.description || "",
+        duration: Number(updatedExam.duration || 60),
+        totalMarks: Number(updatedExam.totalMarks || 100),
+        examCode: updatedExam.examCode || "",
+        allowRetakes: Boolean(updatedExam.allowRetakes),
+        maxAttempts: Number(updatedExam.maxAttempts || 1),
+        isPublished: Boolean(updatedExam.isPublished),
+      });
       setSuccessMessage("Exam updated successfully.");
     } catch (error) {
       const message = error.response?.data?.message;
@@ -236,6 +305,27 @@ function EditExam() {
               including publication and retake options.
             </p>
           </div>
+
+          {attemptInsights.totalAttempts > 0 ? (
+            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">
+              <strong className="block font-semibold">
+                This exam already has student activity.
+              </strong>
+              <p className="mt-2">
+                {attemptInsights.totalAttempts} attempts have been recorded
+                across {attemptInsights.uniqueStudents} student
+                {attemptInsights.uniqueStudents === 1 ? "" : "s"}. Changes to
+                duration, total marks, or retake rules can affect fairness and
+                future attempts.
+              </p>
+              {attemptInsights.maxAttemptNumber > 0 ? (
+                <p className="mt-2">
+                  Highest recorded attempt number so far:{" "}
+                  <strong>{attemptInsights.maxAttemptNumber}</strong>
+                </p>
+              ) : null}
+            </div>
+          ) : null}
 
           {errorMessage ? (
             <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
