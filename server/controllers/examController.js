@@ -79,6 +79,111 @@ const createExam = async (req, res) => {
   }
 };
 
+const getExamById = async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    if (!examId) {
+      return res.status(400).json({ message: "Exam ID is required" });
+    }
+
+    const authorization = await getAuthorizedExam(examId, req.user);
+
+    if (authorization.status) {
+      return res.status(authorization.status).json(authorization.body);
+    }
+
+    return res.status(200).json(authorization.exam);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const updateExam = async (req, res) => {
+  try {
+    const { examId } = req.params;
+    const {
+      title,
+      description,
+      totalMarks,
+      duration,
+      examCode,
+      allowRetakes,
+      maxAttempts,
+      isPublished,
+    } = req.body;
+
+    if (
+      !examId ||
+      !title ||
+      !description ||
+      !totalMarks ||
+      !duration ||
+      !examCode ||
+      typeof allowRetakes !== "boolean" ||
+      typeof isPublished !== "boolean"
+    ) {
+      return res.status(400).json({ message: "All exam fields are required" });
+    }
+
+    const nextDuration = Number(duration);
+    const nextTotalMarks = Number(totalMarks);
+    const nextMaxAttempts = allowRetakes ? Number(maxAttempts) : 1;
+    const normalizedExamCode = examCode.trim().toUpperCase();
+
+    if (
+      Number.isNaN(nextDuration) ||
+      nextDuration <= 0 ||
+      Number.isNaN(nextTotalMarks) ||
+      nextTotalMarks <= 0 ||
+      Number.isNaN(nextMaxAttempts) ||
+      !Number.isInteger(nextMaxAttempts) ||
+      nextMaxAttempts <= 0
+    ) {
+      return res.status(400).json({
+        message:
+          "Duration, total marks, and maximum attempts must be valid positive values",
+      });
+    }
+
+    const authorization = await getAuthorizedExam(examId, req.user);
+
+    if (authorization.status) {
+      return res.status(authorization.status).json(authorization.body);
+    }
+
+    const existingExam = await Exam.findOne({
+      examCode: normalizedExamCode,
+      _id: { $ne: examId },
+    });
+
+    if (existingExam) {
+      return res.status(400).json({ message: "Exam code already exists" });
+    }
+
+    const { exam } = authorization;
+    exam.title = title.trim();
+    exam.description = description.trim();
+    exam.duration = nextDuration;
+    exam.totalMarks = nextTotalMarks;
+    exam.examCode = normalizedExamCode;
+    exam.allowRetakes = allowRetakes;
+    exam.maxAttempts = allowRetakes ? nextMaxAttempts : 1;
+    exam.isPublished = isPublished;
+
+    await exam.save();
+
+    return res.status(200).json({
+      message: "Exam updated successfully",
+      exam,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
 const publishExam = async (req, res) => {
   try {
     const { examId } = req.params;
@@ -295,6 +400,8 @@ const getCreatedExam = async (req, res) => {
 
 module.exports = {
   createExam,
+  getExamById,
+  updateExam,
   publishExam,
   updateExamRetakeSettings,
   submitExam,

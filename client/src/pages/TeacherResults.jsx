@@ -12,6 +12,10 @@ const TeacherResults = () => {
   const [studentSortBy, setStudentSortBy] = useState("bestScore");
   const [attemptFilter, setAttemptFilter] = useState("all");
 
+  const handlePrintResults = () => {
+    window.print();
+  };
+
   const fetchResults = async () => {
     try {
       const response = await API.get(`/exams/${examId}/attempts`);
@@ -219,6 +223,16 @@ const TeacherResults = () => {
             Review student attempts, scores, and submission activity for this
             exam.
           </p>
+        </div>
+
+        <div className="teacher-results-actions no-print">
+          <button
+            type="button"
+            className="secondary-button teacher-results-action-button"
+            onClick={handlePrintResults}
+          >
+            Print / Export Results
+          </button>
         </div>
 
         <div className="teacher-badge-card">

@@ -1,7 +1,9 @@
 const express = require("express");
 const {
   createExam,
+  getExamById,
   publishExam,
+  updateExam,
   updateExamRetakeSettings,
   getAvailableExams,
   submitExam,
@@ -31,11 +33,13 @@ const authorize = require("../middleware/roleMiddleware");
 // ---------- LIST ROUTES FIRST ----------
 router.get("/", protect, getAvailableExams);
 router.get("/teacher/:teacherId", protect, authorize("teacher", "org_admin"), getCreatedExam);
+router.get("/:examId", protect, authorize("teacher", "org_admin"), getExamById);
 
 // ---------- CREATE ----------
 router.post("/create", protect, authorize("teacher", "org_admin"), createExam);
 
 // ---------- EXAM ACTIONS ----------
+router.patch("/:examId", protect, authorize("teacher", "org_admin"), updateExam);
 router.patch("/:examId/publish", protect, authorize("teacher", "org_admin"), publishExam);
 router.patch("/:examId/retake-settings", protect, authorize("teacher", "org_admin"), updateExamRetakeSettings);
 router.post("/:examId/start", protect, authorize("student"), startExam);

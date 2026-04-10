@@ -817,6 +817,16 @@
   line-height: 1.5;
 }
 
+.teacher-results-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.teacher-results-action-button {
+  min-height: 46px;
+  padding-inline: 18px;
+}
+
 .teacher-results-toolbar {
   display: grid;
   gap: 16px;
@@ -1505,6 +1515,8 @@
   }
 
   .teacher-layout,
+  .teacher-page-shell,
+  .teacher-page-section,
   .student-layout,
   .teacher-content,
   .student-content,
@@ -1524,6 +1536,8 @@
   .page-header,
   .panel,
   .stat-box,
+  .teacher-analytics-card,
+  .teacher-analytics-metric,
   .result-review-card,
   .result-option-card,
   .student-hero,
@@ -1550,13 +1564,19 @@
   }
 
   .student-page-shell,
+  .teacher-page-shell,
+  .teacher-page-section,
   .result-review-list,
+  .teacher-analytics-grid,
+  .teacher-analytics-metrics,
   .result-answer-summary,
   .stats-grid {
     gap: 12px;
   }
 
   .student-hero,
+  .teacher-analytics-card,
+  .teacher-analytics-metric,
   .result-review-card,
   .result-option-card,
   .stat-box,
@@ -1584,6 +1604,18 @@
 
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .teacher-analytics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .teacher-analytics-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .teacher-analytics-metric-wide {
+    grid-column: 1 / -1;
   }
 
   .result-review-list {
@@ -1621,6 +1653,8 @@
   }
 
   .student-kicker,
+  .teacher-kicker,
+  .teacher-analytics-pill,
   .result-status-pill,
   .result-summary-badge,
   .result-option-tag,
@@ -1628,6 +1662,16 @@
     border: 1px solid #d1d5db;
     color: #111827 !important;
     background: #f9fafb !important;
+  }
+
+  .teacher-results-table {
+    min-width: 0;
+  }
+
+  .teacher-results-table th,
+  .teacher-results-table td {
+    padding: 10px 8px;
+    font-size: 10.5pt;
   }
 
   .result-score {
