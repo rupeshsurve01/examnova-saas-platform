@@ -35,6 +35,11 @@ const ExamSchema = new mongoose.Schema(
       default: false,
     },
 
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
+
     examCode: {
       type: String,
       required: true,

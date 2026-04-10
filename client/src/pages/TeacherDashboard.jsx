@@ -15,6 +15,7 @@ const TeacherDashboard = () => {
     maxAttempts: "1",
   });
   const [savingRetakeId, setSavingRetakeId] = useState(null);
+  const [processingExamActionId, setProcessingExamActionId] = useState(null);
 
   const fetchTeacherExams = async () => {
     if (!user?.id) {
@@ -110,6 +111,50 @@ const TeacherDashboard = () => {
       );
     } finally {
       setSavingRetakeId(null);
+    }
+  };
+
+  const handleArchiveExam = async (exam) => {
+    const confirmed = window.confirm(
+      `Archive "${exam.title}"? This will remove it from active teacher and student views.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setProcessingExamActionId(exam._id);
+      await API.patch(`/exams/${exam._id}/archive`);
+      setExams((currentExams) =>
+        currentExams.filter((currentExam) => currentExam._id !== exam._id),
+      );
+    } catch (error) {
+      alert(error.response?.data?.message || "Unable to archive this exam.");
+    } finally {
+      setProcessingExamActionId(null);
+    }
+  };
+
+  const handleDeleteExam = async (exam) => {
+    const confirmed = window.confirm(
+      `Delete "${exam.title}" permanently? This can only be done when there are no recorded attempts.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setProcessingExamActionId(exam._id);
+      await API.delete(`/exams/${exam._id}`);
+      setExams((currentExams) =>
+        currentExams.filter((currentExam) => currentExam._id !== exam._id),
+      );
+    } catch (error) {
+      alert(error.response?.data?.message || "Unable to delete this exam.");
+    } finally {
+      setProcessingExamActionId(null);
     }
   };
 
@@ -218,6 +263,10 @@ const TeacherDashboard = () => {
                         : "Single attempt only"}
                     </strong>
                   </div>
+                  <div className="meta-row">
+                    <span>Recorded Attempts</span>
+                    <strong>{exam.attemptsCount || 0}</strong>
+                  </div>
                 </div>
 
                 {editingRetakeExamId === exam._id ? (
@@ -298,6 +347,7 @@ const TeacherDashboard = () => {
                   <button
                     onClick={() => handleEditExam(exam._id)}
                     className="secondary-button"
+                    disabled={processingExamActionId === exam._id}
                   >
                     Edit Exam
                   </button>
@@ -305,6 +355,7 @@ const TeacherDashboard = () => {
                   <button
                     onClick={() => handleViewExam(exam._id)}
                     className="primary-button"
+                    disabled={processingExamActionId === exam._id}
                   >
                     Manage Questions
                   </button>
@@ -312,6 +363,7 @@ const TeacherDashboard = () => {
                   <button
                     onClick={() => handleViewResults(exam._id)}
                     className="secondary-button"
+                    disabled={processingExamActionId === exam._id}
                   >
                     View Results
                   </button>
@@ -319,8 +371,35 @@ const TeacherDashboard = () => {
                   <button
                     onClick={() => handleOpenRetakeSettings(exam)}
                     className="secondary-button"
+                    disabled={processingExamActionId === exam._id}
                   >
                     Retake Settings
+                  </button>
+
+                  <button
+                    onClick={() => handleArchiveExam(exam)}
+                    className="secondary-button"
+                    disabled={processingExamActionId === exam._id}
+                  >
+                    {processingExamActionId === exam._id
+                      ? "Processing..."
+                      : "Archive Exam"}
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteExam(exam)}
+                    className="secondary-button"
+                    disabled={
+                      processingExamActionId === exam._id ||
+                      Number(exam.attemptsCount) > 0
+                    }
+                    title={
+                      Number(exam.attemptsCount) > 0
+                        ? "Exams with recorded attempts must be archived instead of deleted."
+                        : "Delete this exam permanently"
+                    }
+                  >
+                    Delete Exam
                   </button>
 
                   <button onClick={handleCreateExam} className="secondary-button">

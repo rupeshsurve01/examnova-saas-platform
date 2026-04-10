@@ -1,6 +1,8 @@
 const express = require("express");
 const {
   createExam,
+  archiveExam,
+  deleteExam,
   getExamById,
   publishExam,
   updateExam,
@@ -40,8 +42,10 @@ router.post("/create", protect, authorize("teacher", "org_admin"), createExam);
 
 // ---------- EXAM ACTIONS ----------
 router.patch("/:examId", protect, authorize("teacher", "org_admin"), updateExam);
+router.patch("/:examId/archive", protect, authorize("teacher", "org_admin"), archiveExam);
 router.patch("/:examId/publish", protect, authorize("teacher", "org_admin"), publishExam);
 router.patch("/:examId/retake-settings", protect, authorize("teacher", "org_admin"), updateExamRetakeSettings);
+router.delete("/:examId", protect, authorize("teacher", "org_admin"), deleteExam);
 router.post("/:examId/start", protect, authorize("student"), startExam);
 router.post("/:examId/submit", protect, authorize("student"), submitExam);
 

@@ -67,6 +67,7 @@ const createExam = async (req, res) => {
           : 1,
       createdBy,
       organizationId: orgIdFromUser || organizationId || undefined,
+      isArchived: false,
     });
 
     res.status(201).json({
@@ -182,6 +183,13 @@ const updateExam = async (req, res) => {
     }
 
     const { exam } = authorization;
+
+    if (exam.isArchived) {
+      return res.status(400).json({
+        message: "Archived exams cannot be edited until they are restored",
+      });
+    }
+
     exam.title = title.trim();
     exam.description = description.trim();
     exam.duration = nextDuration;
@@ -218,6 +226,13 @@ const publishExam = async (req, res) => {
     }
 
     const { exam } = authorization;
+
+    if (exam.isArchived) {
+      return res.status(400).json({
+        message: "Archived exams cannot be published",
+      });
+    }
+
     exam.isPublished = true;
     await exam.save();
 
@@ -261,6 +276,13 @@ const updateExamRetakeSettings = async (req, res) => {
     }
 
     const { exam } = authorization;
+
+    if (exam.isArchived) {
+      return res.status(400).json({
+        message: "Archived exams cannot update retake settings",
+      });
+    }
+
     exam.allowRetakes = allowRetakes;
     exam.maxAttempts = allowRetakes ? nextMaxAttempts : 1;
     await exam.save();
@@ -289,6 +311,10 @@ const submitExam = async (req, res) => {
 
     if (!exam) {
       return res.status(404).json({ message: "Exam not found" });
+    }
+
+    if (exam.isArchived) {
+      return res.status(403).json({ message: "Exam not available" });
     }
 
     if (!exam.isPublished) {
@@ -348,7 +374,10 @@ const submitExam = async (req, res) => {
 
 const getAvailableExams = async (req, res) => {
   try {
-    const exams = await Exam.find({ isPublished: true }).select(
+    const exams = await Exam.find({
+      isPublished: true,
+      isArchived: { $ne: true },
+    }).select(
       "title description duration totalMarks examCode allowRetakes maxAttempts",
     );
 
@@ -404,16 +433,98 @@ const getCreatedExam = async (req, res) => {
       return res.status(400).json({ message: "Teacher Id Required" });
     }
 
-    const exams = await Exam.find({ createdBy: teacherId });
+    const exams = await Exam.find({
+      createdBy: teacherId,
+      isArchived: { $ne: true },
+    }).lean();
 
     if (!exams || exams.length === 0) {
       return res.status(404).json({ message: "Exams Not Found" });
     }
 
-    res.status(200).json(exams);
+    const attempts = await Attempt.find({
+      examId: { $in: exams.map((exam) => exam._id) },
+    }).select("examId");
+
+    const attemptsByExam = attempts.reduce((counts, attempt) => {
+      const key = attempt.examId.toString();
+      counts[key] = (counts[key] || 0) + 1;
+      return counts;
+    }, {});
+
+    const examsWithAttemptCounts = exams.map((exam) => ({
+      ...exam,
+      attemptsCount: attemptsByExam[exam._id.toString()] || 0,
+    }));
+
+    res.status(200).json(examsWithAttemptCounts);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const archiveExam = async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    if (!examId) {
+      return res.status(400).json({ message: "Exam ID is required" });
+    }
+
+    const authorization = await getAuthorizedExam(examId, req.user);
+
+    if (authorization.status) {
+      return res.status(authorization.status).json(authorization.body);
+    }
+
+    const { exam } = authorization;
+    exam.isArchived = true;
+    exam.isPublished = false;
+    await exam.save();
+
+    return res.status(200).json({
+      message: "Exam archived successfully",
+      exam,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const deleteExam = async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    if (!examId) {
+      return res.status(400).json({ message: "Exam ID is required" });
+    }
+
+    const authorization = await getAuthorizedExam(examId, req.user);
+
+    if (authorization.status) {
+      return res.status(authorization.status).json(authorization.body);
+    }
+
+    const recordedAttempts = await Attempt.countDocuments({ examId });
+
+    if (recordedAttempts > 0) {
+      return res.status(400).json({
+        message:
+          "This exam already has recorded attempts. Archive it instead of deleting it.",
+      });
+    }
+
+    await Question.deleteMany({ examId });
+    await Exam.findByIdAndDelete(examId);
+
+    return res.status(200).json({
+      message: "Exam deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -421,6 +532,8 @@ module.exports = {
   createExam,
   getExamById,
   updateExam,
+  archiveExam,
+  deleteExam,
   publishExam,
   updateExamRetakeSettings,
   submitExam,
