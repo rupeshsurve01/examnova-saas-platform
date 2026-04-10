@@ -57,6 +57,10 @@ const TeacherDashboard = () => {
     navigate(`/teacher-results/${examId}`);
   };
 
+  const handleEditExam = (examId) => {
+    navigate(`/teacher/exams/${examId}/edit`);
+  };
+
   const handleOpenRetakeSettings = (exam) => {
     setEditingRetakeExamId(exam._id);
     setRetakeForm({
@@ -291,6 +295,13 @@ const TeacherDashboard = () => {
                 ) : null}
 
                 <div className="teacher-card-actions">
+                  <button
+                    onClick={() => handleEditExam(exam._id)}
+                    className="secondary-button"
+                  >
+                    Edit Exam
+                  </button>
+
                   <button
                     onClick={() => handleViewExam(exam._id)}
                     className="primary-button"

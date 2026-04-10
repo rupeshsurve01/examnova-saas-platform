@@ -12,6 +12,7 @@ import TeacherLayout from "./components/TeacherLayout";
 import StudentLayout from "./components/StudentLayout";
 import TeacherResults from "./pages/TeacherResults";
 import StudentAttempts from "./pages/StudentAttempts";
+import EditExam from "./pages/EditExam";
 
 const App = () => {
   return (
@@ -47,6 +48,7 @@ const App = () => {
       >
         <Route path="/teacher" element={<TeacherDashboard />} />
         <Route path="/exams" element={<CreateExam />} />
+        <Route path="/teacher/exams/:examId/edit" element={<EditExam />} />
         <Route path="/add-questions" element={<AddQuestions />} />
         <Route path="/teacher-results/:examId" element={<TeacherResults />} />
       </Route>
