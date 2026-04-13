@@ -4,6 +4,8 @@ const {
   archiveExam,
   deleteExam,
   getExamById,
+  getTeacherWorkspaceCode,
+  joinTeacherWorkspace,
   publishExam,
   updateExam,
   updateExamRetakeSettings,
@@ -35,6 +37,8 @@ const authorize = require("../middleware/roleMiddleware");
 // ---------- LIST ROUTES FIRST ----------
 router.get("/", protect, getAvailableExams);
 router.get("/teacher/:teacherId", protect, authorize("teacher", "org_admin"), getCreatedExam);
+router.get("/workspace/code", protect, authorize("teacher"), getTeacherWorkspaceCode);
+router.post("/workspace/join", protect, authorize("student"), joinTeacherWorkspace);
 router.get("/:examId", protect, authorize("teacher", "org_admin"), getExamById);
 
 // ---------- CREATE ----------

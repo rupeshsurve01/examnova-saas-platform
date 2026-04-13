@@ -16,6 +16,7 @@ const TeacherDashboard = () => {
   });
   const [savingRetakeId, setSavingRetakeId] = useState(null);
   const [processingExamActionId, setProcessingExamActionId] = useState(null);
+  const [workspaceCode, setWorkspaceCode] = useState(user?.workspaceCode || "");
 
   const fetchTeacherExams = async () => {
     if (!user?.id) {
@@ -27,8 +28,11 @@ const TeacherDashboard = () => {
     try {
       setLoading(true);
       setErrorMessage("");
-      const response = await API.get(`/exams/teacher/${user.id}`);
-      setExams(response.data);
+      const workspaceResponse = await API.get("/exams/workspace/code");
+      setWorkspaceCode(workspaceResponse.data.workspaceCode || "");
+
+      const examsResponse = await API.get(`/exams/teacher/${user.id}`);
+      setExams(examsResponse.data);
     } catch (error) {
       const message = error.response?.data?.message;
 
@@ -160,6 +164,18 @@ const TeacherDashboard = () => {
 
   const recentExamCode =
     exams.find((exam) => exam.examCode)?.examCode || "Not assigned";
+  const handleCopyWorkspaceCode = async () => {
+    if (!workspaceCode) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(workspaceCode);
+      alert("Workspace code copied.");
+    } catch {
+      alert(`Your workspace code is ${workspaceCode}`);
+    }
+  };
 
   return (
     <div className="teacher-page-shell">
@@ -178,8 +194,21 @@ const TeacherDashboard = () => {
             Create New Exam
           </button>
           <div className="teacher-badge-card">
-            <p className="stat-label">Latest Exam Code</p>
-            <p className="teacher-badge-value">{recentExamCode}</p>
+            <p className="stat-label">Workspace Code</p>
+            <p className="teacher-badge-value">
+              {workspaceCode || "Generating..."}
+            </p>
+            <p className="section-subtitle">
+              Share this code with students so they can join your exam space.
+            </p>
+            <button
+              type="button"
+              className="secondary-button mt-4"
+              onClick={handleCopyWorkspaceCode}
+              disabled={!workspaceCode}
+            >
+              Copy Code
+            </button>
           </div>
         </div>
 
@@ -193,8 +222,8 @@ const TeacherDashboard = () => {
             <p className="stat-value">{user?.role || "Teacher"}</p>
           </div>
           <div className="stat-box teacher-stat-box">
-            <p className="stat-label">Status</p>
-            <p className="stat-value">{loading ? "Syncing" : "Ready"}</p>
+            <p className="stat-label">Latest Exam Code</p>
+            <p className="stat-value">{recentExamCode}</p>
           </div>
         </div>
       </section>

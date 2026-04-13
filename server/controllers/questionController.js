@@ -1,5 +1,7 @@
 const Question = require("../models/Question");
 const Exam = require("../models/Exam"); 
+const Attempt = require("../models/Attempt");
+const StudentWorkspaceAccess = require("../models/StudentWorkspaceAccess");
 
 const addQuestions = async (req, res) => {
   try {
@@ -49,8 +51,42 @@ const getExamQuestions = async (req, res) => {
       return res.status(404).json({ message: "Exam not found" });
     }
 
+    if (exam.isArchived) {
+      return res.status(403).json({ message: "Exam not available" });
+    }
+
+    if (isTeacherView) {
+      const isOrgAdmin = req.user?.role === "org_admin";
+      const isOwner =
+        exam.createdBy && exam.createdBy.toString() === req.user?._id?.toString();
+
+      if (!isOrgAdmin && !isOwner) {
+        return res
+          .status(403)
+          .json({ message: "Unauthorized to view this exam" });
+      }
+    }
+
     if (!exam.isPublished && !isTeacherView) {
       return res.status(403).json({ message: "Exam not available yet" });
+    }
+
+    if (!isTeacherView) {
+      const workspaceAccess = await StudentWorkspaceAccess.findOne({
+        studentId: req.user._id,
+        teacherId: exam.createdBy,
+      });
+      const existingAttempt = await Attempt.findOne({
+        studentId: req.user._id,
+        examId,
+      });
+
+      if (!workspaceAccess && !existingAttempt) {
+        return res.status(403).json({
+          message:
+            "Join this teacher workspace with the workspace code before accessing this exam",
+        });
+      }
     }
 
     const questionsQuery = Question.find({ examId });

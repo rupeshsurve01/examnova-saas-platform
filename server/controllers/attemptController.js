@@ -1,6 +1,7 @@
 const Attempt = require("../models/Attempt");
 const Exam = require("../models/Exam");
 const Question = require("../models/Question");
+const StudentWorkspaceAccess = require("../models/StudentWorkspaceAccess");
 
 const getStudentResult = async (req, res) => {
   try {
@@ -154,10 +155,27 @@ const startExam = async (req, res) => {
       return res.status(403).json({ message: "Exam not available" });
     }
 
+    if (exam.isArchived) {
+      return res.status(403).json({ message: "Exam not available" });
+    }
+
     const studentAttempts = await Attempt.find({ examId, studentId }).sort({
       attemptNumber: -1,
       createdAt: -1,
     });
+
+    const workspaceAccess = await StudentWorkspaceAccess.findOne({
+      studentId,
+      teacherId: exam.createdBy,
+    });
+
+    if (!workspaceAccess && studentAttempts.length === 0) {
+      return res.status(403).json({
+        message:
+          "Join this teacher workspace with the workspace code before starting this exam",
+      });
+    }
+
     const activeAttempt = studentAttempts.find((attempt) => !attempt.submittedAt);
 
     if (activeAttempt) {

@@ -2,6 +2,31 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const generateWorkspaceCode = () =>
+  `TCH-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+
+const createUniqueWorkspaceCode = async () => {
+  let workspaceCode = generateWorkspaceCode();
+  let existingTeacher = await User.findOne({ workspaceCode });
+
+  while (existingTeacher) {
+    workspaceCode = generateWorkspaceCode();
+    existingTeacher = await User.findOne({ workspaceCode });
+  }
+
+  return workspaceCode;
+};
+
+const ensureTeacherWorkspaceCode = async (user) => {
+  if (user.role !== "teacher" || user.workspaceCode) {
+    return user;
+  }
+
+  user.workspaceCode = await createUniqueWorkspaceCode();
+  await user.save();
+  return user;
+};
+
 const generateToken = (user) => {
   return jwt.sign(
     {
@@ -43,6 +68,7 @@ const register = async (req, res) => {
       email: normalizedEmail,
       password: hashedPassword,
       role,
+      workspaceCode: role === "teacher" ? await createUniqueWorkspaceCode() : undefined,
     });
 
     const token = generateToken(user);
@@ -55,6 +81,7 @@ const register = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        workspaceCode: user.workspaceCode || null,
       },
     });
 
@@ -88,16 +115,18 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = generateToken(user);
+    const userWithWorkspace = await ensureTeacherWorkspaceCode(user);
+    const token = generateToken(userWithWorkspace);
 
     res.status(200).json({
       message: "Login successful",
       token,
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+        id: userWithWorkspace._id,
+        name: userWithWorkspace.name,
+        email: userWithWorkspace.email,
+        role: userWithWorkspace.role,
+        workspaceCode: userWithWorkspace.workspaceCode || null,
       },
     });
   } catch (error) {

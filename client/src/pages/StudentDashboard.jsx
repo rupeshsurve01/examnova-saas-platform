@@ -5,6 +5,10 @@ import { useAuth } from "../context/AuthContext";
 
 function StudentDashboard() {
   const [exams, setExams] = useState([]);
+  const [workspaceCode, setWorkspaceCode] = useState("");
+  const [joiningWorkspace, setJoiningWorkspace] = useState(false);
+  const [workspaceMessage, setWorkspaceMessage] = useState("");
+  const [workspaceError, setWorkspaceError] = useState("");
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -69,6 +73,39 @@ function StudentDashboard() {
     }
   };
 
+  const handleJoinWorkspace = async (event) => {
+    event.preventDefault();
+
+    const nextWorkspaceCode = workspaceCode.trim().toUpperCase();
+
+    if (!nextWorkspaceCode) {
+      setWorkspaceError("Enter the workspace code shared by your teacher.");
+      setWorkspaceMessage("");
+      return;
+    }
+
+    try {
+      setJoiningWorkspace(true);
+      setWorkspaceError("");
+      setWorkspaceMessage("");
+      const response = await API.post("/exams/workspace/join", {
+        workspaceCode: nextWorkspaceCode,
+      });
+
+      setWorkspaceCode("");
+      setWorkspaceMessage(
+        `Joined ${response.data.teacher?.name || "teacher"}'s workspace.`,
+      );
+      await fetchExams();
+    } catch (error) {
+      setWorkspaceError(
+        error.response?.data?.message || "Unable to join this workspace.",
+      );
+    } finally {
+      setJoiningWorkspace(false);
+    }
+  };
+
   useEffect(() => {
     fetchExams();
   }, []);
@@ -80,13 +117,14 @@ function StudentDashboard() {
           <span className="student-kicker">Exam Center</span>
           <h1 className="page-title">Available Exams</h1>
           <p className="page-subtitle">
-            View all published exams and start your attempt from this page.
+            Join your teacher's workspace with the code they shared, then start
+            exams from that private exam space.
           </p>
         </div>
 
         <div className="stats-grid">
           <div className="stat-box student-stat-box">
-            <p className="stat-label">Published Exams</p>
+            <p className="stat-label">Workspace Exams</p>
             <p className="stat-value">{exams.length}</p>
           </div>
           <div className="stat-box student-stat-box">
@@ -101,12 +139,59 @@ function StudentDashboard() {
       </section>
 
       <section className="student-page-section">
+        <div className="panel p-6">
+          <div>
+            <h2 className="section-title">Join teacher workspace</h2>
+            <p className="section-subtitle">
+              Enter the workspace code your teacher shared to unlock their
+              published exams.
+            </p>
+          </div>
+
+          <form
+            onSubmit={handleJoinWorkspace}
+            className="mt-5 grid gap-3 md:grid-cols-[1fr_auto]"
+          >
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Example: TCH-AB12C"
+              value={workspaceCode}
+              onChange={(event) => {
+                setWorkspaceCode(event.target.value.toUpperCase());
+                setWorkspaceError("");
+                setWorkspaceMessage("");
+              }}
+              disabled={joiningWorkspace}
+            />
+            <button
+              type="submit"
+              className="primary-button"
+              disabled={joiningWorkspace}
+            >
+              {joiningWorkspace ? "Joining..." : "Join Workspace"}
+            </button>
+          </form>
+
+          {workspaceMessage ? (
+            <p className="student-exam-note student-exam-note-active">
+              {workspaceMessage}
+            </p>
+          ) : null}
+
+          {workspaceError ? (
+            <p className="student-exam-note student-exam-note-blocked">
+              {workspaceError}
+            </p>
+          ) : null}
+        </div>
+
         {exams.length === 0 ? (
           <div className="panel p-8 text-center">
-            <h2 className="section-title">No exams available</h2>
+            <h2 className="section-title">No workspace exams yet</h2>
             <p className="section-subtitle">
-              Published exams will appear here once they are created by a
-              teacher.
+              Enter a teacher workspace code above. Published exams from joined
+              teachers will appear here.
             </p>
           </div>
         ) : (

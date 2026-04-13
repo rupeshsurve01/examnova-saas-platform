@@ -1,6 +1,36 @@
 const Attempt = require("../models/Attempt");
 const Question = require("../models/Question");
 const Exam = require("../models/Exam");
+const User = require("../models/User");
+const StudentWorkspaceAccess = require("../models/StudentWorkspaceAccess");
+
+const generateWorkspaceCode = () =>
+  `TCH-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+
+const createUniqueWorkspaceCode = async () => {
+  let workspaceCode = generateWorkspaceCode();
+  let existingTeacher = await User.findOne({ workspaceCode });
+
+  while (existingTeacher) {
+    workspaceCode = generateWorkspaceCode();
+    existingTeacher = await User.findOne({ workspaceCode });
+  }
+
+  return workspaceCode;
+};
+
+const ensureTeacherWorkspaceCode = async (teacher) => {
+  if (!teacher || teacher.role !== "teacher") {
+    return null;
+  }
+
+  if (!teacher.workspaceCode) {
+    teacher.workspaceCode = await createUniqueWorkspaceCode();
+    await teacher.save();
+  }
+
+  return teacher.workspaceCode;
+};
 
 const getAuthorizedExam = async (examId, user) => {
   const exam = await Exam.findById(examId);
@@ -374,11 +404,26 @@ const submitExam = async (req, res) => {
 
 const getAvailableExams = async (req, res) => {
   try {
-    const exams = await Exam.find({
+    const examFilter = {
       isPublished: true,
       isArchived: { $ne: true },
-    }).select(
-      "title description duration totalMarks examCode allowRetakes maxAttempts",
+    };
+
+    if (req.user?.role === "student") {
+      const joinedWorkspaces = await StudentWorkspaceAccess.find({
+        studentId: req.user._id,
+      }).select("teacherId");
+      const teacherIds = joinedWorkspaces.map((workspace) => workspace.teacherId);
+
+      if (teacherIds.length === 0) {
+        return res.status(200).json([]);
+      }
+
+      examFilter.createdBy = { $in: teacherIds };
+    }
+
+    const exams = await Exam.find(examFilter).select(
+      "title description duration totalMarks examCode allowRetakes maxAttempts createdBy",
     );
 
     if (req.user?.role !== "student") {
@@ -464,6 +509,80 @@ const getCreatedExam = async (req, res) => {
   }
 };
 
+const getTeacherWorkspaceCode = async (req, res) => {
+  try {
+    if (req.user.role !== "teacher") {
+      return res
+        .status(403)
+        .json({ message: "Only teachers can have workspace codes" });
+    }
+
+    const workspaceCode = await ensureTeacherWorkspaceCode(req.user);
+
+    return res.status(200).json({
+      workspaceCode,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const joinTeacherWorkspace = async (req, res) => {
+  try {
+    const { workspaceCode } = req.body;
+
+    if (req.user.role !== "student") {
+      return res
+        .status(403)
+        .json({ message: "Only students can join teacher workspaces" });
+    }
+
+    if (!workspaceCode) {
+      return res.status(400).json({ message: "Workspace code is required" });
+    }
+
+    const normalizedWorkspaceCode = workspaceCode.trim().toUpperCase();
+    const teacher = await User.findOne({
+      workspaceCode: normalizedWorkspaceCode,
+      role: "teacher",
+    }).select("name email workspaceCode role");
+
+    if (!teacher) {
+      return res.status(404).json({ message: "Teacher workspace not found" });
+    }
+
+    const access = await StudentWorkspaceAccess.findOneAndUpdate(
+      {
+        studentId: req.user._id,
+        teacherId: teacher._id,
+      },
+      {
+        studentId: req.user._id,
+        teacherId: teacher._id,
+      },
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+      },
+    );
+
+    return res.status(200).json({
+      message: "Workspace joined successfully",
+      teacher: {
+        id: teacher._id,
+        name: teacher.name,
+        workspaceCode: teacher.workspaceCode,
+      },
+      access,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
 const archiveExam = async (req, res) => {
   try {
     const { examId } = req.params;
@@ -534,6 +653,8 @@ module.exports = {
   updateExam,
   archiveExam,
   deleteExam,
+  getTeacherWorkspaceCode,
+  joinTeacherWorkspace,
   publishExam,
   updateExamRetakeSettings,
   submitExam,

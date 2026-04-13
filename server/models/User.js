@@ -31,6 +31,14 @@ const UserSchema = new mongoose.Schema(
       ref: "Organization",
       required: false,
     },
+
+    workspaceCode: {
+      type: String,
+      unique: true,
+      sparse: true,
+      uppercase: true,
+      trim: true,
+    },
   },
   { timestamps: true },
 );
