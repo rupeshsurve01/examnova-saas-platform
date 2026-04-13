@@ -69,6 +69,14 @@ function StudentDashboard() {
       const res = await API.get("/exams");
       setExams(res.data);
     } catch (error) {
+      const message = error.response?.data?.message;
+
+      if (message === "Unauthorized") {
+        logout();
+        navigate("/");
+        return;
+      }
+
       console.error(error);
     }
   };
@@ -98,8 +106,16 @@ function StudentDashboard() {
       );
       await fetchExams();
     } catch (error) {
+      const message = error.response?.data?.message;
+
+      if (message === "Unauthorized") {
+        logout();
+        navigate("/");
+        return;
+      }
+
       setWorkspaceError(
-        error.response?.data?.message || "Unable to join this workspace.",
+        message || "Unable to join this workspace.",
       );
     } finally {
       setJoiningWorkspace(false);
