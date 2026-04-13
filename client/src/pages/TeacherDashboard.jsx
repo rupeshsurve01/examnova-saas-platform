@@ -17,6 +17,7 @@ const TeacherDashboard = () => {
   const [savingRetakeId, setSavingRetakeId] = useState(null);
   const [processingExamActionId, setProcessingExamActionId] = useState(null);
   const [workspaceCode, setWorkspaceCode] = useState(user?.workspaceCode || "");
+  const [openActionsExamId, setOpenActionsExamId] = useState(null);
 
   const fetchTeacherExams = async () => {
     if (!user?.id) {
@@ -68,6 +69,7 @@ const TeacherDashboard = () => {
 
   const handleOpenRetakeSettings = (exam) => {
     setEditingRetakeExamId(exam._id);
+    setOpenActionsExamId(null);
     setRetakeForm({
       allowRetakes: Boolean(exam.allowRetakes),
       maxAttempts: String(exam.maxAttempts || 1),
@@ -119,6 +121,7 @@ const TeacherDashboard = () => {
   };
 
   const handleArchiveExam = async (exam) => {
+    setOpenActionsExamId(null);
     const confirmed = window.confirm(
       `Archive "${exam.title}"? This will remove it from active teacher and student views.`,
     );
@@ -141,6 +144,7 @@ const TeacherDashboard = () => {
   };
 
   const handleDeleteExam = async (exam) => {
+    setOpenActionsExamId(null);
     const confirmed = window.confirm(
       `Delete "${exam.title}" permanently? This can only be done when there are no recorded attempts.`,
     );
@@ -374,14 +378,6 @@ const TeacherDashboard = () => {
 
                 <div className="teacher-card-actions">
                   <button
-                    onClick={() => handleEditExam(exam._id)}
-                    className="secondary-button"
-                    disabled={processingExamActionId === exam._id}
-                  >
-                    Edit Exam
-                  </button>
-
-                  <button
                     onClick={() => handleViewExam(exam._id)}
                     className="primary-button"
                     disabled={processingExamActionId === exam._id}
@@ -396,44 +392,68 @@ const TeacherDashboard = () => {
                   >
                     View Results
                   </button>
+                </div>
 
+                <div className="teacher-card-menu-wrap">
                   <button
-                    onClick={() => handleOpenRetakeSettings(exam)}
-                    className="secondary-button"
+                    type="button"
+                    className="teacher-card-menu-trigger"
+                    onClick={() =>
+                      setOpenActionsExamId((current) =>
+                        current === exam._id ? null : exam._id,
+                      )
+                    }
                     disabled={processingExamActionId === exam._id}
                   >
-                    Retake Settings
+                    More actions
                   </button>
 
-                  <button
-                    onClick={() => handleArchiveExam(exam)}
-                    className="secondary-button"
-                    disabled={processingExamActionId === exam._id}
-                  >
-                    {processingExamActionId === exam._id
-                      ? "Processing..."
-                      : "Archive Exam"}
-                  </button>
-
-                  <button
-                    onClick={() => handleDeleteExam(exam)}
-                    className="secondary-button"
-                    disabled={
-                      processingExamActionId === exam._id ||
-                      Number(exam.attemptsCount) > 0
-                    }
-                    title={
-                      Number(exam.attemptsCount) > 0
-                        ? "Exams with recorded attempts must be archived instead of deleted."
-                        : "Delete this exam permanently"
-                    }
-                  >
-                    Delete Exam
-                  </button>
-
-                  <button onClick={handleCreateExam} className="secondary-button">
-                    Create Another
-                  </button>
+                  {openActionsExamId === exam._id ? (
+                    <div className="teacher-card-menu">
+                      <button
+                        type="button"
+                        onClick={() => handleEditExam(exam._id)}
+                        className="teacher-card-menu-item"
+                        disabled={processingExamActionId === exam._id}
+                      >
+                        Edit exam
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenRetakeSettings(exam)}
+                        className="teacher-card-menu-item"
+                        disabled={processingExamActionId === exam._id}
+                      >
+                        Retake settings
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleArchiveExam(exam)}
+                        className="teacher-card-menu-item teacher-card-menu-item-warning"
+                        disabled={processingExamActionId === exam._id}
+                      >
+                        {processingExamActionId === exam._id
+                          ? "Processing..."
+                          : "Archive exam"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteExam(exam)}
+                        className="teacher-card-menu-item teacher-card-menu-item-danger"
+                        disabled={
+                          processingExamActionId === exam._id ||
+                          Number(exam.attemptsCount) > 0
+                        }
+                        title={
+                          Number(exam.attemptsCount) > 0
+                            ? "Exams with recorded attempts must be archived instead of deleted."
+                            : "Delete this exam permanently"
+                        }
+                      >
+                        Delete exam
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </article>
             ))}
