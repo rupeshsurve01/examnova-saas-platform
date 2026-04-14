@@ -1,147 +1,171 @@
+<div align="center">
+
 # ExamNova
 
-ExamNova is a full-stack MERN SaaS-style online examination platform built around **teacher-owned workspaces**. Each teacher gets a private workspace code, students join that teacher's exam space with the code, and exams/results stay scoped to the teacher workspace.
+### Multi-Tenant Teacher Workspace SaaS for Online Exams
 
-The project is designed as a resume-ready SaaS product demo with role-based flows, timed exams, retake limits, answer review, teacher analytics, print/export support, and workspace-based student access.
+ExamNova is a full-stack MERN SaaS-style examination platform where each teacher owns a private workspace, students join using a teacher workspace code, and exams/results stay scoped to that teacher workspace.
+
+<br />
+
+<p>
+  <img src="https://img.shields.io/badge/Frontend-React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=111827" alt="React" />
+  <img src="https://img.shields.io/badge/Backend-Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/API-Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express" />
+  <img src="https://img.shields.io/badge/Database-MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT" />
+</p>
+
+<p>
+  <img src="https://img.shields.io/badge/Deploy-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
+  <img src="https://img.shields.io/badge/Deploy-Render-46E3B7?style=for-the-badge&logo=render&logoColor=111827" alt="Render" />
+  <img src="https://img.shields.io/badge/Status-Resume%20Demo%20Ready-2563EB?style=for-the-badge" alt="Status" />
+</p>
+
+<br />
+
+<a href="#live-demo"><strong>Live Demo</strong></a>
+&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="#core-features"><strong>Features</strong></a>
+&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="#local-setup"><strong>Setup</strong></a>
+&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="#demo-flow"><strong>Demo Flow</strong></a>
+
+</div>
+
+---
 
 ## Live Demo
 
-- Frontend: https://examnova-saas-platform.vercel.app
-- Backend: https://examnova-backend.onrender.com
+| Service | URL |
+| --- | --- |
+| Frontend | Add your Vercel URL here |
+| Backend | https://examnova-backend.onrender.com |
 
-## What Problem It Solves
+---
 
-Teachers need a simple way to create online exams, share them with only their own students, manage attempts, and review results. Students need a focused exam-taking flow where they can join the correct teacher workspace, attempt published exams, and review their performance.
+## Overview
 
-ExamNova solves this with:
+ExamNova is built around a **teacher-workspace multi-tenant model**.
 
-- Teacher workspace codes for multi-tenant access
-- Teacher-owned exam management
-- Student workspace join flow
-- Timed exam attempts with retake policies
-- Detailed result review and teacher analytics
+Instead of every student seeing every published exam, each teacher gets a private workspace code. Students enter that code to join the teacher's exam space and can only access exams from workspaces they have joined.
+
+This makes the app suitable for a SaaS-style resume project because it demonstrates:
+
+| SaaS Capability | How ExamNova Handles It |
+| --- | --- |
+| Tenant model | Teacher-owned workspaces |
+| Access control | Students join by workspace code |
+| Data isolation | Students only see exams from joined teachers |
+| Role-based flows | Teacher and student dashboards |
+| Reporting | Attempt history, result review, teacher analytics |
+| Lifecycle management | Create, edit, publish, archive, safe delete |
+
+---
 
 ## Core Features
 
-### Authentication And Roles
+### Authentication And Role Access
 
-- JWT authentication
-- Password hashing with bcrypt
-- Role-based access for:
-  - Student
-  - Teacher
-  - Org admin support in backend routes
-- Protected frontend routes
-- Token-based API requests through Axios interceptors
+| Feature | Status |
+| --- | --- |
+| JWT authentication | Implemented |
+| Password hashing with bcrypt | Implemented |
+| Student and teacher role flows | Implemented |
+| Protected frontend routes | Implemented |
+| Axios token interceptor | Implemented |
 
 ### Teacher Workspace Multi-Tenancy
 
-- Each teacher acts as a workspace tenant
-- Teachers receive a unique `workspaceCode`
-- Students join a teacher workspace by entering that code
-- Students only see published exams from joined teacher workspaces
-- Students cannot directly access another teacher's exam without joining the workspace
+- Each teacher acts as a workspace owner.
+- Teachers receive a unique `workspaceCode`.
+- Students join a teacher workspace using that code.
+- Students only see published exams from joined teacher workspaces.
+- Students cannot directly access another teacher's exam without joining that workspace.
 
-### Teacher Exam Management
+### Teacher Features
 
-- Create exam
-- Edit full exam details:
-  - Title
-  - Description
-  - Duration
-  - Total marks
-  - Exam code
-  - Publish status
-  - Retake settings
-- Archive exams
-- Safe delete exams only when no attempts exist
-- Risk warnings when editing important exam settings after attempts already exist
-- Clean teacher dashboard with compact action menu
+| Area | Features |
+| --- | --- |
+| Dashboard | Workspace code, exam cards, compact action menu |
+| Exam creation | Title, description, duration, marks, exam code, retake policy |
+| Full exam editing | Edit details, publish status, retake settings |
+| Question management | Add, edit, delete questions |
+| Exam lifecycle | Publish, archive, safe delete |
+| Safety | Risk warnings after attempts exist |
+| Results | Attempt records, per-student analytics, search/sort/filter |
+| Export | Print/export teacher results |
 
-### Question Management
+### Student Features
 
-- Add questions to exams
-- Edit existing questions
-- Delete questions safely
-- Correct answer selection
-- Marks per question
-- Teacher question bank view
+| Area | Features |
+| --- | --- |
+| Workspace join | Join teacher workspace using code |
+| Exam access | See only joined-workspace exams |
+| Attempt flow | Start/resume exams |
+| Timer | Countdown, low-time warning, auto-submit |
+| Auto-save | Temporary local answer auto-save |
+| Results | Score summary and answer-by-answer review |
+| History | Search, sort, filter attempt history |
+| Export | Print/export result page |
 
-### Student Exam Flow
+---
 
-- Join teacher workspace using workspace code
-- View only exams from joined teacher workspaces
-- Start/resume exam attempts
-- Attempt limits shown before starting
-- Timed exam interface
-- Low-time warnings
-- Auto-submit when time expires
-- Temporary local answer auto-save using `localStorage`
-- Auto-save status indicator
+## Exam Flow
 
-### Retake Support
+```txt
+Teacher registers
+  -> Teacher gets workspace code
+  -> Teacher creates exam
+  -> Teacher adds questions
+  -> Teacher publishes exam
+  -> Student registers
+  -> Student joins teacher workspace using code
+  -> Student starts exam
+  -> Timer runs and answers auto-save locally
+  -> Student submits
+  -> Student reviews detailed result
+  -> Teacher reviews analytics
+```
 
-- Teacher can enable/disable retakes
-- Teacher can configure maximum attempts
-- Student dashboard shows:
-  - Used attempts
-  - Max attempts
-  - Attempts remaining
-  - Active attempt status
-- Result routes are attempt-based, so multiple attempts are tracked correctly
-
-### Results And Analytics
-
-- Student result page with:
-  - Score summary
-  - Correct answers count
-  - Incorrect answers count
-  - Not answered count
-  - Answer-by-answer review
-  - Correct/selected option highlighting
-  - Print/export result support
-- Student attempt history with:
-  - Search
-  - Sorting
-  - Filtering
-  - Attempt cards
-  - View result action
-- Teacher results page with:
-  - Total attempts
-  - Highest score
-  - Average score
-  - Latest submission
-  - Per-student analytics
-  - Search, sorting, and filtering
-  - Print/export teacher results
+---
 
 ## Tech Stack
 
 ### Frontend
 
-- React 19
-- Vite
-- React Router
-- Axios
-- Tailwind CSS v4
-- Custom CSS for dashboard/result/print layouts
+| Tool | Purpose |
+| --- | --- |
+| React 19 | UI |
+| Vite | Build tooling |
+| React Router | Routing |
+| Axios | API calls |
+| Tailwind CSS v4 | Utility styling |
+| Custom CSS | Dashboard, result, print layouts |
 
 ### Backend
 
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT
-- bcryptjs
-- CORS
-- dotenv
+| Tool | Purpose |
+| --- | --- |
+| Node.js | Runtime |
+| Express.js | API server |
+| MongoDB | Database |
+| Mongoose | ODM |
+| JWT | Authentication |
+| bcryptjs | Password hashing |
+| CORS | Cross-origin API access |
+| dotenv | Environment variables |
 
 ### Deployment
 
-- Frontend: Vercel
-- Backend: Render
-- Database: MongoDB Atlas
+| Platform | Usage |
+| --- | --- |
+| Vercel | Frontend hosting |
+| Render | Backend hosting |
+| MongoDB Atlas | Cloud database |
+
+---
 
 ## Project Structure
 
@@ -163,6 +187,8 @@ examnova-saas-platform/
     package.json
 ```
 
+---
+
 ## Local Setup
 
 ### 1. Clone The Repository
@@ -179,7 +205,7 @@ cd server
 npm install
 ```
 
-### 3. Create Backend Environment File
+### 3. Configure Backend Environment
 
 Create `server/.env`:
 
@@ -196,7 +222,7 @@ JWT_EXPIRES_IN=7d
 npm run dev
 ```
 
-The backend should run at:
+Backend runs at:
 
 ```txt
 http://localhost:5000
@@ -211,7 +237,7 @@ cd client
 npm install
 ```
 
-### 6. Create Frontend Environment File
+### 6. Configure Frontend Environment
 
 Create `client/.env`:
 
@@ -219,7 +245,7 @@ Create `client/.env`:
 VITE_API_URL=http://localhost:5000/api
 ```
 
-For deployed frontend, use:
+For deployed frontend:
 
 ```env
 VITE_API_URL=https://examnova-backend.onrender.com/api
@@ -231,13 +257,15 @@ VITE_API_URL=https://examnova-backend.onrender.com/api
 npm run dev
 ```
 
-The frontend should run at:
+Frontend runs at:
 
 ```txt
 http://localhost:5173
 ```
 
-## Deployment Notes
+---
+
+## Deployment
 
 ### Backend On Render
 
@@ -249,7 +277,7 @@ Build Command: npm install
 Start Command: npm start
 ```
 
-Add environment variables:
+Environment variables:
 
 ```env
 MONGO_URI=your_mongodb_atlas_connection_string
@@ -269,33 +297,40 @@ Output Directory: dist
 Install Command: npm install
 ```
 
-Add environment variable:
+Environment variable:
 
 ```env
 VITE_API_URL=https://examnova-backend.onrender.com/api
 ```
 
+---
+
 ## Demo Flow
 
-Use this flow when showing the project:
+Use this flow for recruiters, interviews, and project demos:
 
-1. Register or log in as a teacher
-2. Copy the teacher workspace code from the dashboard
-3. Create an exam
-4. Add questions
-5. Publish the exam
-6. Register or log in as a student
-7. Join the teacher workspace using the workspace code
-8. Start the exam
-9. Submit answers
-10. Review the detailed result page
-11. Log back in as teacher
-12. Open teacher results and analytics
-13. Print/export the result report
+| Step | Action |
+| --- | --- |
+| 1 | Register or log in as a teacher |
+| 2 | Copy teacher workspace code |
+| 3 | Create an exam |
+| 4 | Add questions |
+| 5 | Publish the exam |
+| 6 | Register or log in as a student |
+| 7 | Join teacher workspace using the code |
+| 8 | Start and submit the exam |
+| 9 | Review detailed result page |
+| 10 | Log back in as teacher |
+| 11 | Open teacher results and analytics |
+| 12 | Print/export result report |
+
+---
 
 ## Resume Summary
 
-Built ExamNova, a multi-tenant MERN exam SaaS platform with teacher-owned workspaces, workspace-code student access, exam authoring, timed attempts, retake limits, answer auto-save, detailed result review, print/export reports, and teacher analytics.
+> Built ExamNova, a multi-tenant MERN exam SaaS platform with teacher-owned workspaces, workspace-code student access, exam authoring, timed attempts, retake limits, answer auto-save, detailed result review, print/export reports, and teacher analytics.
+
+---
 
 ## Future Improvements
 
@@ -306,6 +341,8 @@ Built ExamNova, a multi-tenant MERN exam SaaS platform with teacher-owned worksp
 - Charts for teacher analytics
 - Stronger admin/org management if expanding beyond teacher-owned workspaces
 
+---
+
 ## Status
 
-This project is deployed and resume-demo ready. The core exam platform, teacher workspace access model, student attempt flow, analytics, and print/export features are implemented.
+ExamNova is deployed and resume-demo ready. The core exam platform, teacher workspace access model, student attempt flow, analytics, and print/export features are implemented.
