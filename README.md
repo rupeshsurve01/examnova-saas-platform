@@ -1,11 +1,18 @@
 <div align="center">
 
-# ExamNova
+# 🚀 ExamNova
 
-### Multi-Tenant Teacher Workspace SaaS for Online Exams
+### 🎓 Multi-Tenant Teacher Workspace SaaS for Online Exams
 
 ExamNova is a full-stack MERN SaaS-style examination platform where each teacher owns a private workspace, students join using a teacher workspace code, and exams/results stay scoped to that teacher workspace.
 
+<br />
+
+<a href="https://examnova-saas-platform.vercel.app">
+  <img src="https://img.shields.io/badge/🚀%20Open%20Live%20Demo-2563EB?style=for-the-badge&logo=vercel&logoColor=white" alt="Open Live Demo" />
+</a>
+
+<br />
 <br />
 
 <p>
@@ -19,33 +26,32 @@ ExamNova is a full-stack MERN SaaS-style examination platform where each teacher
 <p>
   <img src="https://img.shields.io/badge/Deploy-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
   <img src="https://img.shields.io/badge/Deploy-Render-46E3B7?style=for-the-badge&logo=render&logoColor=111827" alt="Render" />
-  <img src="https://img.shields.io/badge/Status-Resume%20Demo%20Ready-2563EB?style=for-the-badge" alt="Status" />
 </p>
 
 <br />
 
-<a href="#live-demo"><strong>Live Demo</strong></a>
+<a href="#-live-demo"><strong>🚀 Live Demo</strong></a>
 &nbsp;&nbsp;|&nbsp;&nbsp;
-<a href="#core-features"><strong>Features</strong></a>
+<a href="#-core-features"><strong>✨ Features</strong></a>
 &nbsp;&nbsp;|&nbsp;&nbsp;
-<a href="#local-setup"><strong>Setup</strong></a>
+<a href="#-local-setup"><strong>🛠️ Setup</strong></a>
 &nbsp;&nbsp;|&nbsp;&nbsp;
-<a href="#demo-flow"><strong>Demo Flow</strong></a>
+<a href="#-demo-flow"><strong>🎬 Demo Flow</strong></a>
 
 </div>
 
 ---
 
-## Live Demo
+## 🚀 Live Demo
 
 | Service | URL |
 | --- | --- |
-| Frontend | Add your Vercel URL here |
-| Backend | https://examnova-backend.onrender.com |
+| 🌐 Frontend | [Open ExamNova](https://examnova-saas-platform.vercel.app) |
+| ⚙️ Backend | [Render API](https://examnova-backend.onrender.com) |
 
 ---
 
-## Overview
+## 🧠 Overview
 
 ExamNova is built around a **teacher-workspace multi-tenant model**.
 
@@ -64,9 +70,9 @@ This makes the app suitable for a SaaS-style resume project because it demonstra
 
 ---
 
-## Core Features
+## ✨ Core Features
 
-### Authentication And Role Access
+### 🔐 Authentication And Role Access
 
 | Feature | Status |
 | --- | --- |
@@ -76,15 +82,15 @@ This makes the app suitable for a SaaS-style resume project because it demonstra
 | Protected frontend routes | Implemented |
 | Axios token interceptor | Implemented |
 
-### Teacher Workspace Multi-Tenancy
+### 🏫 Teacher Workspace Multi-Tenancy
 
-- Each teacher acts as a workspace owner.
-- Teachers receive a unique `workspaceCode`.
-- Students join a teacher workspace using that code.
-- Students only see published exams from joined teacher workspaces.
-- Students cannot directly access another teacher's exam without joining that workspace.
+- 🧑‍🏫 Each teacher acts as a workspace owner.
+- 🔑 Teachers receive a unique `workspaceCode`.
+- 🎒 Students join a teacher workspace using that code.
+- 🧭 Students only see published exams from joined teacher workspaces.
+- 🛡️ Students cannot directly access another teacher's exam without joining that workspace.
 
-### Teacher Features
+### 🧑‍🏫 Teacher Features
 
 | Area | Features |
 | --- | --- |
@@ -97,7 +103,7 @@ This makes the app suitable for a SaaS-style resume project because it demonstra
 | Results | Attempt records, per-student analytics, search/sort/filter |
 | Export | Print/export teacher results |
 
-### Student Features
+### 🎒 Student Features
 
 | Area | Features |
 | --- | --- |
@@ -112,7 +118,7 @@ This makes the app suitable for a SaaS-style resume project because it demonstra
 
 ---
 
-## Exam Flow
+## 🔁 Exam Flow
 
 ```txt
 Teacher registers
@@ -131,9 +137,9 @@ Teacher registers
 
 ---
 
-## Tech Stack
+## 🧰 Tech Stack
 
-### Frontend
+### 🎨 Frontend
 
 | Tool | Purpose |
 | --- | --- |
@@ -144,7 +150,7 @@ Teacher registers
 | Tailwind CSS v4 | Utility styling |
 | Custom CSS | Dashboard, result, print layouts |
 
-### Backend
+### 🧩 Backend
 
 | Tool | Purpose |
 | --- | --- |
@@ -157,7 +163,7 @@ Teacher registers
 | CORS | Cross-origin API access |
 | dotenv | Environment variables |
 
-### Deployment
+### ☁️ Deployment
 
 | Platform | Usage |
 | --- | --- |
@@ -167,7 +173,7 @@ Teacher registers
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```txt
 examnova-saas-platform/
@@ -189,7 +195,7 @@ examnova-saas-platform/
 
 ---
 
-## Local Setup
+## 🛠️ Local Setup
 
 ### 1. Clone The Repository
 
@@ -265,9 +271,9 @@ http://localhost:5173
 
 ---
 
-## Deployment
+## ☁️ Deployment
 
-### Backend On Render
+### ⚙️ Backend On Render
 
 Use these settings:
 
@@ -285,7 +291,7 @@ JWT_SECRET=your_jwt_secret
 JWT_EXPIRES_IN=7d
 ```
 
-### Frontend On Vercel
+### 🌐 Frontend On Vercel
 
 Use these settings:
 
@@ -305,7 +311,7 @@ VITE_API_URL=https://examnova-backend.onrender.com/api
 
 ---
 
-## Demo Flow
+## 🎬 Demo Flow
 
 Use this flow for recruiters, interviews, and project demos:
 
@@ -326,23 +332,23 @@ Use this flow for recruiters, interviews, and project demos:
 
 ---
 
-## Resume Summary
+## 💼 Resume Summary
 
 > Built ExamNova, a multi-tenant MERN exam SaaS platform with teacher-owned workspaces, workspace-code student access, exam authoring, timed attempts, retake limits, answer auto-save, detailed result review, print/export reports, and teacher analytics.
 
 ---
 
-## Future Improvements
+## 🧭 Future Improvements
 
-- Archived exams restore page
-- Teacher dashboard search and filters
-- Custom modals instead of browser alerts/confirms
-- Backend partial answer auto-save
-- Charts for teacher analytics
-- Stronger admin/org management if expanding beyond teacher-owned workspaces
+- 📦 Archived exams restore page
+- 🔎 Teacher dashboard search and filters
+- 🪟 Custom modals instead of browser alerts/confirms
+- 💾 Backend partial answer auto-save
+- 📊 Charts for teacher analytics
+- 🏢 Stronger admin/org management if expanding beyond teacher-owned workspaces
 
 ---
 
-## Status
+## ✅ Status
 
 ExamNova is deployed and resume-demo ready. The core exam platform, teacher workspace access model, student attempt flow, analytics, and print/export features are implemented.
