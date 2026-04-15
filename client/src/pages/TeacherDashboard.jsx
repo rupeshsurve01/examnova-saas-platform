@@ -197,9 +197,9 @@ const TeacherDashboard = () => {
           <button onClick={handleCreateExam} className="primary-button">
             Create New Exam
           </button>
-          <div className="teacher-badge-card">
+          <div className="teacher-badge-card border-l-4 border-blue-600 bg-white shadow-sm transition-all hover:shadow-md">
             <p className="stat-label">Workspace Code</p>
-            <p className="teacher-badge-value">
+            <p className="teacher-badge-value font-mono tracking-tighter text-blue-700">
               {workspaceCode || "Generating..."}
             </p>
             <p className="section-subtitle">
@@ -207,7 +207,7 @@ const TeacherDashboard = () => {
             </p>
             <button
               type="button"
-              className="secondary-button mt-4"
+              className="secondary-button mt-4 w-full"
               onClick={handleCopyWorkspaceCode}
               disabled={!workspaceCode}
             >
@@ -217,17 +217,17 @@ const TeacherDashboard = () => {
         </div>
 
         <div className="stats-grid">
-          <div className="stat-box teacher-stat-box">
+          <div className="stat-box teacher-stat-box group border border-transparent transition-all hover:border-blue-100 hover:shadow-sm">
             <p className="stat-label">Created Exams</p>
-            <p className="stat-value">{exams.length}</p>
+            <p className="stat-value transition-colors group-hover:text-blue-600">{exams.length}</p>
           </div>
-          <div className="stat-box teacher-stat-box">
+          <div className="stat-box teacher-stat-box group border border-transparent transition-all hover:border-blue-100 hover:shadow-sm">
             <p className="stat-label">Role</p>
             <p className="stat-value">{user?.role || "Teacher"}</p>
           </div>
-          <div className="stat-box teacher-stat-box">
+          <div className="stat-box teacher-stat-box group border border-transparent transition-all hover:border-blue-100 hover:shadow-sm">
             <p className="stat-label">Latest Exam Code</p>
-            <p className="stat-value">{recentExamCode}</p>
+            <p className="stat-value font-mono text-slate-500">{recentExamCode}</p>
           </div>
         </div>
       </section>
@@ -262,7 +262,7 @@ const TeacherDashboard = () => {
         ) : (
           <div className="exam-grid">
             {exams.map((exam) => (
-              <article key={exam._id} className="exam-card teacher-exam-card">
+              <article key={exam._id} className="exam-card teacher-exam-card transition-all hover:border-blue-200 hover:shadow-lg">
                 <div className="teacher-card-top">
                   <div>
                     <h2 className="section-title">{exam.title}</h2>
@@ -275,7 +275,7 @@ const TeacherDashboard = () => {
                   </span>
                 </div>
 
-                <div className="exam-card-meta mt-5">
+                <div className="exam-card-meta mt-5 space-y-1 border-t border-[var(--border)] pt-4">
                   <div className="meta-row">
                     <span>Duration</span>
                     <strong>{exam.duration} minutes</strong>
@@ -286,7 +286,9 @@ const TeacherDashboard = () => {
                   </div>
                   <div className="meta-row">
                     <span>Publish Status</span>
-                    <strong>{exam.isPublished ? "Published" : "Draft"}</strong>
+                    <strong className={exam.isPublished ? "text-emerald-600" : "text-amber-600"}>
+                      {exam.isPublished ? "Published" : "Draft"}
+                    </strong>
                   </div>
                   <div className="meta-row">
                     <span>Retake Policy</span>
@@ -409,7 +411,7 @@ const TeacherDashboard = () => {
                   </button>
 
                   {openActionsExamId === exam._id ? (
-                    <div className="teacher-card-menu">
+                    <div className="teacher-card-menu absolute right-0 z-20 mt-2 w-48 rounded-xl border border-[var(--border)] bg-white p-2 shadow-2xl animate-in fade-in zoom-in duration-150">
                       <button
                         type="button"
                         onClick={() => handleEditExam(exam._id)}

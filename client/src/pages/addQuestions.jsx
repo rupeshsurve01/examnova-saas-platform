@@ -282,7 +282,7 @@ function AddQuestions() {
           </p>
         </div>
 
-        <div className="teacher-badge-card">
+        <div className="teacher-badge-card border-l-4 border-blue-600 transition-shadow hover:shadow-md">
           <p className="stat-label">Selected Exam</p>
           <p className="teacher-badge-value">
             {selectedExam?.title || "Choose an exam"}
@@ -295,17 +295,17 @@ function AddQuestions() {
         </div>
 
         <div className="stats-grid">
-          <div className="stat-box teacher-stat-box">
+          <div className="stat-box teacher-stat-box transition-all hover:bg-slate-50">
             <p className="stat-label">Questions Added</p>
             <p className="stat-value">{questions.length}</p>
           </div>
-          <div className="stat-box teacher-stat-box">
+          <div className="stat-box teacher-stat-box transition-all hover:bg-slate-50">
             <p className="stat-label">Marks Authored</p>
             <p className="stat-value">{totalQuestionMarks}</p>
           </div>
-          <div className="stat-box teacher-stat-box">
+          <div className="stat-box teacher-stat-box transition-all hover:bg-slate-50">
             <p className="stat-label">Status</p>
-            <p className="stat-value">
+            <p className={`stat-value ${selectedExam?.isPublished ? "text-green-600" : "text-amber-600"}`}>
               {selectedExam?.isPublished ? "Published" : "Draft"}
             </p>
           </div>
@@ -588,9 +588,9 @@ function AddQuestions() {
               {questions.map((question, index) => (
                 <article
                   key={question._id}
-                  className={`question-bank-card ${
+                  className={`question-bank-card transition-all ${
                     editingQuestionId === question._id
-                      ? "question-bank-card-editing"
+                      ? "question-bank-card-editing border-blue-500 bg-blue-50/30 ring-2 ring-blue-200"
                       : ""
                   }`}
                 >
@@ -619,7 +619,7 @@ function AddQuestions() {
                       return (
                         <div
                           key={`${question._id}-${optionIndex}`}
-                          className={`option-card ${isCorrect ? "option-card-selected" : ""}`}
+                          className={`option-card transition-all hover:translate-x-1 ${isCorrect ? "border-emerald-200 bg-emerald-50 text-emerald-900 shadow-sm" : "bg-white"}`}
                         >
                           <span className="option-badge">
                             {optionLabels[optionIndex]}

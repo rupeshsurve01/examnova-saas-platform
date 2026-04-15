@@ -155,7 +155,7 @@ function StudentDashboard() {
       </section>
 
       <section className="student-page-section">
-        <div className="panel p-6">
+        <div className="panel border-2 border-blue-50 p-6 shadow-sm">
           <div>
             <h2 className="section-title">Join teacher workspace</h2>
             <p className="section-subtitle">
@@ -170,7 +170,7 @@ function StudentDashboard() {
           >
             <input
               type="text"
-              className="form-input"
+              className="form-input font-mono focus:ring-2 focus:ring-blue-500"
               placeholder="Example: TCH-AB12C"
               value={workspaceCode}
               onChange={(event) => {
@@ -213,7 +213,7 @@ function StudentDashboard() {
         ) : (
           <div className="exam-grid">
             {exams.map((exam) => (
-              <article key={exam._id} className="exam-card student-exam-card">
+              <article key={exam._id} className="exam-card student-exam-card transition-all hover:border-blue-200 hover:shadow-md">
                 <h2 className="section-title">{exam.title}</h2>
                 <p className="section-subtitle">{exam.description}</p>
 
@@ -262,7 +262,7 @@ function StudentDashboard() {
                   </p>
                 ) : (
                   <p className="student-exam-note">
-                    {exam.allowRetakes
+                    {exam.allowRetakes && exam.attemptsRemaining > 0
                       ? `${exam.attemptsRemaining} attempt(s) remaining.`
                       : "You have one chance to complete this exam."}
                   </p>

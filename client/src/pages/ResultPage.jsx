@@ -90,7 +90,7 @@ function ResultPage() {
         <div className="stats-grid">
           <div className="stat-box student-stat-box">
             <p className="stat-label">Your Score</p>
-            <div className="result-score mt-3">{result.score}</div>
+            <div className="result-score mt-3 text-4xl font-bold text-blue-600">{result.score}</div>
           </div>
           <div className="stat-box student-stat-box">
             <p className="stat-label">Exam Code</p>
@@ -105,7 +105,7 @@ function ResultPage() {
             </p>
           </div>
           <div className="stat-box student-stat-box">
-            <p className="stat-label">Correct Answers</p>
+            <p className="stat-label mb-2">Correct Answers</p>
             <span className="result-summary-badge result-summary-badge-correct">
               Correct
             </span>

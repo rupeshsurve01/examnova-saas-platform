@@ -189,7 +189,7 @@ function ExamPage() {
             <div className="exam-save-status">
               <span
                 className={`exam-save-pill ${
-                  saveStatus === "Saved" ? "exam-save-pill-saved" : ""
+                  saveStatus === "Saved" ? "exam-save-pill-saved bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-50"
                 }`}
               >
                 {saveStatus === "Saving" ? "Saving..." : "Answers auto-saved"}
