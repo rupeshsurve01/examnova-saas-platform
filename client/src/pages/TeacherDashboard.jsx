@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -18,6 +18,10 @@ const TeacherDashboard = () => {
   const [processingExamActionId, setProcessingExamActionId] = useState(null);
   const [workspaceCode, setWorkspaceCode] = useState(user?.workspaceCode || "");
   const [openActionsExamId, setOpenActionsExamId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [publishFilter, setPublishFilter] = useState("all");
+  const [retakeFilter, setRetakeFilter] = useState("all");
+  const [attemptFilter, setAttemptFilter] = useState("all");
 
   const fetchTeacherExams = async () => {
     if (!user?.id) {
@@ -168,6 +172,50 @@ const TeacherDashboard = () => {
 
   const recentExamCode =
     exams.find((exam) => exam.examCode)?.examCode || "Not assigned";
+  const filteredExams = useMemo(() => {
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+
+    return exams.filter((exam) => {
+      const title = exam.title?.toLowerCase() || "";
+      const code = exam.examCode?.toLowerCase() || "";
+      const matchesSearch = normalizedSearchQuery
+        ? title.includes(normalizedSearchQuery) ||
+          code.includes(normalizedSearchQuery)
+        : true;
+
+      if (!matchesSearch) {
+        return false;
+      }
+
+      if (publishFilter === "published" && !exam.isPublished) {
+        return false;
+      }
+
+      if (publishFilter === "draft" && exam.isPublished) {
+        return false;
+      }
+
+      if (retakeFilter === "retakes" && !exam.allowRetakes) {
+        return false;
+      }
+
+      if (retakeFilter === "single" && exam.allowRetakes) {
+        return false;
+      }
+
+      const attemptsCount = Number(exam.attemptsCount) || 0;
+      if (attemptFilter === "withAttempts" && attemptsCount === 0) {
+        return false;
+      }
+
+      if (attemptFilter === "noAttempts" && attemptsCount > 0) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [attemptFilter, exams, publishFilter, retakeFilter, searchQuery]);
+
   const handleCopyWorkspaceCode = async () => {
     if (!workspaceCode) {
       return;
@@ -233,6 +281,79 @@ const TeacherDashboard = () => {
       </section>
 
       <section className="teacher-page-section">
+        {!loading && exams.length > 0 ? (
+          <div className="panel p-6">
+            <div className="teacher-dashboard-toolbar">
+              <div className="teacher-dashboard-toolbar-group teacher-dashboard-toolbar-search">
+                <label className="field-label" htmlFor="teacher-exam-search">
+                  Search Exams
+                </label>
+                <input
+                  id="teacher-exam-search"
+                  type="text"
+                  className="form-input"
+                  placeholder="Search by exam title or code"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                />
+              </div>
+
+              <div className="teacher-dashboard-toolbar-group">
+                <label className="field-label" htmlFor="teacher-publish-filter">
+                  Publish Status
+                </label>
+                <select
+                  id="teacher-publish-filter"
+                  className="form-input"
+                  value={publishFilter}
+                  onChange={(event) => setPublishFilter(event.target.value)}
+                >
+                  <option value="all">All</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                </select>
+              </div>
+
+              <div className="teacher-dashboard-toolbar-group">
+                <label className="field-label" htmlFor="teacher-retake-filter">
+                  Retake Mode
+                </label>
+                <select
+                  id="teacher-retake-filter"
+                  className="form-input"
+                  value={retakeFilter}
+                  onChange={(event) => setRetakeFilter(event.target.value)}
+                >
+                  <option value="all">All</option>
+                  <option value="retakes">Retakes Enabled</option>
+                  <option value="single">Single Attempt</option>
+                </select>
+              </div>
+
+              <div className="teacher-dashboard-toolbar-group">
+                <label className="field-label" htmlFor="teacher-attempt-filter">
+                  Attempt Activity
+                </label>
+                <select
+                  id="teacher-attempt-filter"
+                  className="form-input"
+                  value={attemptFilter}
+                  onChange={(event) => setAttemptFilter(event.target.value)}
+                >
+                  <option value="all">All</option>
+                  <option value="withAttempts">With Attempts</option>
+                  <option value="noAttempts">No Attempts</option>
+                </select>
+              </div>
+            </div>
+
+            <p className="teacher-dashboard-toolbar-summary">
+              Showing {filteredExams.length} exams out of {exams.length} total
+              exams.
+            </p>
+          </div>
+        ) : null}
+
         {errorMessage ? (
           <div className="panel teacher-empty-state p-8 text-center">
             <h2 className="section-title">Unable to load exams</h2>
@@ -259,9 +380,16 @@ const TeacherDashboard = () => {
               Create Your First Exam
             </button>
           </div>
+        ) : filteredExams.length === 0 ? (
+          <div className="panel teacher-empty-state p-8 text-center">
+            <h2 className="section-title">No matching exams</h2>
+            <p className="section-subtitle">
+              Try changing search or filters to view more exams.
+            </p>
+          </div>
         ) : (
           <div className="exam-grid">
-            {exams.map((exam) => (
+            {filteredExams.map((exam) => (
               <article key={exam._id} className="exam-card teacher-exam-card transition-all hover:border-blue-200 hover:shadow-lg">
                 <div className="teacher-card-top">
                   <div>

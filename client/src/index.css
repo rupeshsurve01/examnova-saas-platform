@@ -927,6 +927,26 @@
   gap: 16px;
 }
 
+.teacher-dashboard-toolbar {
+  display: grid;
+  gap: 16px;
+}
+
+.teacher-dashboard-toolbar-group {
+  display: grid;
+  gap: 8px;
+}
+
+.teacher-dashboard-toolbar-search {
+  min-width: 0;
+}
+
+.teacher-dashboard-toolbar-summary {
+  margin-top: 18px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 .teacher-results-toolbar-group {
   display: grid;
   gap: 8px;
@@ -1572,6 +1592,15 @@
   border-color: #a9c2f2;
   background: linear-gradient(180deg, #f8fbff 0%, #e7f0ff 100%);
   box-shadow: 0 14px 26px rgba(47, 111, 237, 0.12);
+}
+
+@media (min-width: 768px) {
+  .teacher-dashboard-toolbar {
+    grid-template-columns:
+      minmax(260px, 1.5fr)
+      repeat(3, minmax(170px, 0.7fr));
+    align-items: end;
+  }
 }
 
 @media (min-width: 900px) {
