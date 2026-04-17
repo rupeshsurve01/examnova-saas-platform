@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f3f6fb;
+  --bg: #eef3fb;
   --surface: #ffffff;
-  --surface-muted: #f7f9fc;
-  --border: #d7e0ea;
+  --surface-muted: #f4f8ff;
+  --border: #d3deec;
   --text: #14263d;
-  --muted: #5f738c;
+  --muted: #58708d;
   --primary: #2f6fed;
   --primary-dark: #1f57c8;
   --success: #1f8f5f;
   --danger: #dc2626;
-  --shadow: 0 14px 36px rgba(19, 38, 61, 0.08);
+  --shadow: 0 16px 38px rgba(19, 38, 61, 0.09);
 }
 
 @layer base {
@@ -22,9 +22,13 @@
   body {
     margin: 0;
     min-height: 100vh;
-    background: var(--bg);
+    background:
+      radial-gradient(circle at 8% 6%, rgba(47, 111, 237, 0.09), transparent 26%),
+      radial-gradient(circle at 92% 2%, rgba(31, 143, 95, 0.08), transparent 22%),
+      linear-gradient(180deg, #f6f9ff 0%, var(--bg) 100%);
     color: var(--text);
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.5;
   }
 
   h1,
@@ -51,7 +55,7 @@
   .container-card {
     width: 100%;
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 18px;
     background: var(--surface);
     box-shadow: var(--shadow);
   }
@@ -62,13 +66,16 @@
     justify-content: space-between;
     gap: 16px;
     border-bottom: 1px solid var(--border);
-    padding: 18px 24px;
+    padding: 18px 22px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 251, 255, 0.96));
   }
 
   .brand {
-    font-size: 1.25rem;
+    font-size: 1.28rem;
     font-weight: 700;
     color: var(--primary-dark);
+    letter-spacing: 0.01em;
   }
 
   .page-header {
@@ -79,14 +86,15 @@
   }
 
   .page-title {
-    font-size: 2rem;
+    font-size: 2.08rem;
     font-weight: 700;
     color: var(--text);
+    letter-spacing: -0.02em;
   }
 
   .page-subtitle {
     max-width: 720px;
-    line-height: 1.6;
+    line-height: 1.65;
     color: var(--muted);
   }
 
@@ -121,12 +129,14 @@
     border-radius: 14px;
     background: var(--surface);
     box-shadow: var(--shadow);
+    transition: border-color 180ms ease, box-shadow 180ms ease;
   }
 
   .section-title {
-    font-size: 1.25rem;
+    font-size: 1.28rem;
     font-weight: 700;
     color: var(--text);
+    letter-spacing: -0.01em;
   }
 
   .section-subtitle {
@@ -182,6 +192,7 @@
     background: #fff;
     padding: 12px 14px;
     color: var(--text);
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
   }
 
   .form-input:focus {
@@ -193,25 +204,44 @@
   .primary-button {
     border: none;
     border-radius: 10px;
-    background: var(--primary);
+    background: linear-gradient(180deg, #3d7cff 0%, #2f6fed 100%);
     color: white;
     padding: 12px 18px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 160ms ease;
+    box-shadow: 0 10px 20px rgba(47, 111, 237, 0.24);
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease,
+      background-color 160ms ease;
   }
 
   .primary-button:hover {
-    background: var(--primary-dark);
+    transform: translateY(-1px);
+    background: linear-gradient(180deg, #2f6fed 0%, #1f57c8 100%);
+    box-shadow: 0 14px 24px rgba(47, 111, 237, 0.28);
   }
 
   .secondary-button {
     border: 1px solid var(--border);
     border-radius: 10px;
-    background: white;
+    background: linear-gradient(180deg, #ffffff 0%, #f6faff 100%);
     color: var(--text);
     padding: 12px 18px;
     font-weight: 600;
+    cursor: pointer;
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      color 160ms ease;
+  }
+
+  .secondary-button:hover {
+    transform: translateY(-1px);
+    border-color: #bfd3f8;
+    color: #1f57c8;
+    box-shadow: 0 10px 18px rgba(47, 111, 237, 0.12);
   }
 
   .exam-grid {
@@ -224,6 +254,13 @@
     border-radius: 14px;
     background: var(--surface);
     padding: 20px;
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .exam-card:hover {
+    transform: translateY(-1px);
+    border-color: #c2d5f5;
+    box-shadow: 0 16px 28px rgba(47, 111, 237, 0.1);
   }
 
   .exam-card-meta {
@@ -630,7 +667,7 @@
   gap: 24px;
   border-right: 1px solid #cad8ec;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 248, 255, 0.98));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(240, 247, 255, 0.99));
   padding: 24px 20px;
 }
 
@@ -1066,6 +1103,7 @@
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);
   padding: 18px 24px;
+  box-shadow: 0 8px 20px rgba(19, 38, 61, 0.05);
 }
 
 .student-mobile-menu-button {
@@ -1431,6 +1469,11 @@
   border-radius: 18px;
   background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
   padding: 22px;
+  transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease;
+}
+
+.result-review-card:hover {
+  transform: translateY(-1px);
 }
 
 .result-review-card-correct {
