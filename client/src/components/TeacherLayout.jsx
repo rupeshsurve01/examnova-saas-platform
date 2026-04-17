@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -11,15 +12,45 @@ const navItems = [
 function TeacherLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
+  const handleNavigate = (path) => {
+    navigate(path);
+    setIsSidebarOpen(false);
+  };
+
   return (
     <div className="teacher-layout">
-      <aside className="teacher-sidebar">
+      <header className="teacher-mobile-topbar">
+        <div>
+          <div className="brand">ExamNova</div>
+          <p className="teacher-sidebar-subtitle">Teacher control center</p>
+        </div>
+        <button
+          type="button"
+          className="teacher-mobile-menu-button"
+          onClick={() => setIsSidebarOpen((current) => !current)}
+          aria-label="Toggle teacher navigation"
+        >
+          {isSidebarOpen ? "Close" : "Menu"}
+        </button>
+      </header>
+
+      {isSidebarOpen ? (
+        <button
+          type="button"
+          className="teacher-sidebar-backdrop"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-label="Close menu backdrop"
+        />
+      ) : null}
+
+      <aside className={`teacher-sidebar ${isSidebarOpen ? "teacher-sidebar-open" : ""}`}>
         <div className="teacher-sidebar-header">
           <div className="brand">ExamNova</div>
           <p className="teacher-sidebar-subtitle">Teacher control center</p>
@@ -39,6 +70,7 @@ function TeacherLayout() {
               key={item.to}
               to={item.to}
               end={item.end}
+              onClick={() => setIsSidebarOpen(false)}
               className={({ isActive }) =>
                 `teacher-nav-link${isActive ? " teacher-nav-link-active" : ""}`
               }
@@ -51,7 +83,7 @@ function TeacherLayout() {
         <div className="teacher-sidebar-footer">
           <button
             type="button"
-            onClick={() => navigate("/exams")}
+            onClick={() => handleNavigate("/exams")}
             className="primary-button teacher-sidebar-action"
           >
             New Exam

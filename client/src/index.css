@@ -606,6 +606,24 @@
     linear-gradient(180deg, #f7faff 0%, #edf3fb 100%);
 }
 
+.teacher-mobile-topbar {
+  display: none;
+}
+
+.teacher-mobile-menu-button {
+  border: 1px solid #c6d7f4;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1f57c8;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 14px;
+}
+
+.teacher-sidebar-backdrop {
+  display: none;
+}
+
 .teacher-sidebar {
   display: flex;
   flex-direction: column;
@@ -1048,6 +1066,17 @@
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);
   padding: 18px 24px;
+}
+
+.student-mobile-menu-button {
+  display: none;
+  border: 1px solid #c6d7f4;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1f57c8;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 14px;
 }
 
 .student-navbar-brand {
@@ -1608,6 +1637,11 @@
     grid-template-columns: 280px minmax(0, 1fr);
   }
 
+  .teacher-mobile-topbar,
+  .teacher-sidebar-backdrop {
+    display: none !important;
+  }
+
   .teacher-sidebar {
     position: sticky;
     top: 0;
@@ -1650,27 +1684,97 @@
     grid-template-columns: 1fr;
   }
 
-  .teacher-sidebar {
-    border-right: none;
+  .teacher-mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     border-bottom: 1px solid #cad8ec;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    padding: 14px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .teacher-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    border: none;
+    background: rgba(20, 38, 61, 0.4);
+    z-index: 49;
+  }
+
+  .teacher-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(82vw, 320px);
+    border-right: 1px solid #cad8ec;
+    border-bottom: none;
+    box-shadow: 0 20px 40px rgba(19, 38, 61, 0.25);
+    transform: translateX(-100%);
+    transition: transform 180ms ease;
+    z-index: 50;
+    overflow-y: auto;
+  }
+
+  .teacher-sidebar-open {
+    transform: translateX(0);
   }
 
   .teacher-sidebar-nav,
   .teacher-sidebar-footer {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-content {
+    padding: 16px;
   }
 
   .student-navbar {
-    justify-content: center;
-    text-align: center;
+    align-items: flex-start;
+    padding: 14px 16px;
   }
 
+  .student-mobile-menu-button {
+    display: inline-flex;
+  }
+
+  .student-navbar-nav,
   .student-navbar-actions {
-    justify-content: center;
+    display: none;
+    width: 100%;
+  }
+
+  .student-navbar-nav-open {
+    display: grid;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .student-navbar-actions-open {
+    display: grid;
+    gap: 12px;
+    margin-top: 4px;
   }
 
   .student-navbar-user {
+    text-align: left;
+  }
+
+  .student-nav-link {
+    display: block;
+    width: 100%;
+    border-radius: 12px;
     text-align: center;
+  }
+
+  .student-content {
+    padding: 16px;
   }
 
   .exam-topbar {
@@ -1685,6 +1789,250 @@
   .exam-timer {
     align-items: flex-start;
     width: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .app-shell {
+    padding: 14px;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 16px;
+  }
+
+  .page-header {
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 1.55rem;
+    line-height: 1.25;
+  }
+
+  .page-subtitle,
+  .section-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .panel,
+  .exam-card,
+  .question-shell,
+  .result-review-card {
+    border-radius: 12px;
+  }
+
+  .teacher-content,
+  .student-content {
+    padding: 14px;
+  }
+
+  .teacher-page-shell,
+  .teacher-page-section,
+  .student-page-shell,
+  .student-page-section {
+    gap: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .stat-box {
+    padding: 14px;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+  }
+
+  .exam-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .teacher-card-top,
+  .student-attempt-header,
+  .result-review-header,
+  .teacher-analytics-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .teacher-code-pill,
+  .student-attempt-score-pill,
+  .result-status-pill,
+  .teacher-analytics-pill {
+    align-self: flex-start;
+  }
+
+  .meta-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .teacher-card-actions {
+    grid-template-columns: 1fr;
+    margin-top: 18px;
+  }
+
+  .teacher-card-menu {
+    min-width: 190px;
+  }
+
+  .teacher-retake-editor {
+    padding: 14px;
+  }
+
+  .teacher-retake-field {
+    max-width: none;
+    width: 100%;
+  }
+
+  .teacher-results-toolbar,
+  .teacher-dashboard-toolbar {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .teacher-results-toolbar-summary,
+  .teacher-dashboard-toolbar-summary {
+    margin-top: 12px;
+  }
+
+  .teacher-analytics-grid,
+  .teacher-analytics-metrics,
+  .teacher-chart-grid,
+  .result-answer-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-chart-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .teacher-chart-value {
+    text-align: left;
+  }
+
+  .teacher-chart-label-student {
+    max-width: none;
+  }
+
+  .teacher-results-table {
+    min-width: 540px;
+  }
+
+  .teacher-results-table th,
+  .teacher-results-table td {
+    padding: 12px 10px;
+    font-size: 0.9rem;
+  }
+
+  .student-attempt-toolbar {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .student-attempt-controls {
+    gap: 12px;
+  }
+
+  .student-search-group,
+  .student-filter-input {
+    min-width: 100%;
+  }
+
+  .student-filter-chips {
+    width: 100%;
+  }
+
+  .student-filter-chip {
+    flex: 1 1 calc(50% - 6px);
+    text-align: center;
+  }
+
+  .exam-topbar-status {
+    width: 100%;
+    justify-items: start;
+  }
+
+  .exam-timer {
+    min-width: 0;
+  }
+
+  .exam-timer-value {
+    font-size: 1.3rem;
+  }
+
+  .result-summary-actions {
+    width: 100%;
+  }
+
+  .result-action-button {
+    width: 100%;
+  }
+
+  .result-options-list {
+    margin-top: 16px;
+  }
+
+  .result-option-card {
+    padding: 12px;
+  }
+
+  .question-actions-row {
+    flex-direction: column;
+  }
+
+  .question-action-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.35rem;
+  }
+
+  .brand {
+    font-size: 1.05rem;
+  }
+
+  .teacher-mobile-topbar,
+  .student-navbar {
+    padding: 12px;
+  }
+
+  .teacher-mobile-menu-button,
+  .student-mobile-menu-button {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .teacher-sidebar-footer .secondary-button,
+  .teacher-sidebar-action {
+    width: 100%;
+  }
+
+  .teacher-sidebar {
+    width: 88vw;
+  }
+
+  .student-filter-chip {
+    flex-basis: 100%;
   }
 }
 
