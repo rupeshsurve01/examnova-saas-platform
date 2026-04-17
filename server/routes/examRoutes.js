@@ -2,6 +2,7 @@ const express = require("express");
 const {
   createExam,
   archiveExam,
+  restoreExam,
   deleteExam,
   getExamById,
   getTeacherWorkspaceCode,
@@ -11,7 +12,8 @@ const {
   updateExamRetakeSettings,
   getAvailableExams,
   submitExam,
-  getCreatedExam
+  getCreatedExam,
+  getArchivedExams,
 } = require("../controllers/examController");
 
 const {
@@ -37,6 +39,7 @@ const authorize = require("../middleware/roleMiddleware");
 // ---------- LIST ROUTES FIRST ----------
 router.get("/", protect, getAvailableExams);
 router.get("/teacher/:teacherId", protect, authorize("teacher", "org_admin"), getCreatedExam);
+router.get("/teacher/:teacherId/archived", protect, authorize("teacher", "org_admin"), getArchivedExams);
 router.get("/workspace/code", protect, authorize("teacher"), getTeacherWorkspaceCode);
 router.post("/workspace/join", protect, authorize("student"), joinTeacherWorkspace);
 router.get("/:examId", protect, authorize("teacher", "org_admin"), getExamById);
@@ -47,6 +50,7 @@ router.post("/create", protect, authorize("teacher", "org_admin"), createExam);
 // ---------- EXAM ACTIONS ----------
 router.patch("/:examId", protect, authorize("teacher", "org_admin"), updateExam);
 router.patch("/:examId/archive", protect, authorize("teacher", "org_admin"), archiveExam);
+router.patch("/:examId/restore", protect, authorize("teacher", "org_admin"), restoreExam);
 router.patch("/:examId/publish", protect, authorize("teacher", "org_admin"), publishExam);
 router.patch("/:examId/retake-settings", protect, authorize("teacher", "org_admin"), updateExamRetakeSettings);
 router.delete("/:examId", protect, authorize("teacher", "org_admin"), deleteExam);

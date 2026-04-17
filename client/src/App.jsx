@@ -13,6 +13,7 @@ import StudentLayout from "./components/StudentLayout";
 import TeacherResults from "./pages/TeacherResults";
 import StudentAttempts from "./pages/StudentAttempts";
 import EditExam from "./pages/EditExam";
+import ArchivedExams from "./pages/ArchivedExams";
 
 const App = () => {
   return (
@@ -47,6 +48,7 @@ const App = () => {
         }
       >
         <Route path="/teacher" element={<TeacherDashboard />} />
+        <Route path="/teacher/archived" element={<ArchivedExams />} />
         <Route path="/exams" element={<CreateExam />} />
         <Route path="/teacher/exams/:examId/edit" element={<EditExam />} />
         <Route path="/add-questions" element={<AddQuestions />} />

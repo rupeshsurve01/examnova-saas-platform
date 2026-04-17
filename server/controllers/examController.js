@@ -509,6 +509,52 @@ const getCreatedExam = async (req, res) => {
   }
 };
 
+const getArchivedExams = async (req, res) => {
+  try {
+    const teacherId = req.params.teacherId;
+
+    if (!teacherId) {
+      return res.status(400).json({ message: "Teacher Id Required" });
+    }
+
+    const isOrgAdmin = req.user?.role === "org_admin";
+    const isOwner = req.user?._id?.toString() === teacherId.toString();
+
+    if (!isOrgAdmin && !isOwner) {
+      return res.status(403).json({ message: "Unauthorized to view exams" });
+    }
+
+    const exams = await Exam.find({
+      createdBy: teacherId,
+      isArchived: true,
+    }).lean();
+
+    if (!exams || exams.length === 0) {
+      return res.status(404).json({ message: "Archived exams not found" });
+    }
+
+    const attempts = await Attempt.find({
+      examId: { $in: exams.map((exam) => exam._id) },
+    }).select("examId");
+
+    const attemptsByExam = attempts.reduce((counts, attempt) => {
+      const key = attempt.examId.toString();
+      counts[key] = (counts[key] || 0) + 1;
+      return counts;
+    }, {});
+
+    const examsWithAttemptCounts = exams.map((exam) => ({
+      ...exam,
+      attemptsCount: attemptsByExam[exam._id.toString()] || 0,
+    }));
+
+    res.status(200).json(examsWithAttemptCounts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 const getTeacherWorkspaceCode = async (req, res) => {
   try {
     if (req.user.role !== "teacher") {
@@ -612,6 +658,34 @@ const archiveExam = async (req, res) => {
   }
 };
 
+const restoreExam = async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    if (!examId) {
+      return res.status(400).json({ message: "Exam ID is required" });
+    }
+
+    const authorization = await getAuthorizedExam(examId, req.user);
+
+    if (authorization.status) {
+      return res.status(authorization.status).json(authorization.body);
+    }
+
+    const { exam } = authorization;
+    exam.isArchived = false;
+    await exam.save();
+
+    return res.status(200).json({
+      message: "Exam restored successfully",
+      exam,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
 const deleteExam = async (req, res) => {
   try {
     const { examId } = req.params;
@@ -652,6 +726,7 @@ module.exports = {
   getExamById,
   updateExam,
   archiveExam,
+  restoreExam,
   deleteExam,
   getTeacherWorkspaceCode,
   joinTeacherWorkspace,
@@ -660,4 +735,5 @@ module.exports = {
   submitExam,
   getAvailableExams,
   getCreatedExam,
+  getArchivedExams,
 };

@@ -5,6 +5,7 @@ const navItems = [
   { to: "/teacher", label: "Dashboard", end: true },
   { to: "/exams", label: "Create Exam" },
   { to: "/add-questions", label: "Question Bank" },
+  { to: "/teacher/archived", label: "Archived Exams" },
 ];
 
 function TeacherLayout() {
