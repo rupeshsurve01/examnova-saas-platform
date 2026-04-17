@@ -162,6 +162,30 @@ const TeacherResults = () => {
 
     return true;
   });
+  const scoreDistribution = [
+    { label: "0 - 25", min: 0, max: 25, count: 0 },
+    { label: "26 - 50", min: 26, max: 50, count: 0 },
+    { label: "51 - 75", min: 51, max: 75, count: 0 },
+    { label: "76 - 100", min: 76, max: 100, count: 0 },
+    { label: "100+", min: 101, max: Number.POSITIVE_INFINITY, count: 0 },
+  ].map((bucket) => ({
+    ...bucket,
+    count: filteredAttempts.filter((attempt) => {
+      const score = Number(attempt.score) || 0;
+      return score >= bucket.min && score <= bucket.max;
+    }).length,
+  }));
+  const maxScoreDistributionCount =
+    Math.max(...scoreDistribution.map((bucket) => bucket.count), 0) || 1;
+  const attemptsPerStudentData = filteredStudentAnalytics
+    .slice()
+    .sort((first, second) => second.totalAttempts - first.totalAttempts)
+    .slice(0, 6);
+  const maxAttemptsPerStudent =
+    Math.max(
+      ...attemptsPerStudentData.map((student) => student.totalAttempts),
+      0,
+    ) || 1;
 
   if (loading) {
     return (
@@ -323,6 +347,91 @@ const TeacherResults = () => {
             {filteredAttempts.length} attempts from {attempts.length} recorded
             attempts.
           </p>
+        </div>
+
+        <div className="panel p-6">
+          <div>
+            <h2 className="section-title">Analytics charts</h2>
+            <p className="section-subtitle">
+              Visual breakdown of score bands and highest attempt activity by
+              student for the current filter.
+            </p>
+          </div>
+
+          <div className="teacher-chart-grid mt-6">
+            <article className="teacher-chart-card">
+              <h3 className="section-title teacher-chart-title">
+                Score distribution
+              </h3>
+              <p className="section-subtitle">
+                Attempts grouped by score range.
+              </p>
+
+              <div className="teacher-chart-bars mt-5">
+                {scoreDistribution.map((bucket) => {
+                  const widthPercent =
+                    (bucket.count / maxScoreDistributionCount) * 100;
+
+                  return (
+                    <div key={bucket.label} className="teacher-chart-row">
+                      <span className="teacher-chart-label">{bucket.label}</span>
+                      <div className="teacher-chart-bar-track">
+                        <div
+                          className="teacher-chart-bar-fill"
+                          style={{ width: `${widthPercent}%` }}
+                        />
+                      </div>
+                      <span className="teacher-chart-value">{bucket.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </article>
+
+            <article className="teacher-chart-card">
+              <h3 className="section-title teacher-chart-title">
+                Attempts per student
+              </h3>
+              <p className="section-subtitle">
+                Top students by number of attempts.
+              </p>
+
+              {attemptsPerStudentData.length === 0 ? (
+                <div className="panel teacher-empty-state mt-5 p-5 text-center">
+                  <p className="section-subtitle">
+                    No student attempt data available for the current filter.
+                  </p>
+                </div>
+              ) : (
+                <div className="teacher-chart-bars mt-5">
+                  {attemptsPerStudentData.map((student) => {
+                    const widthPercent =
+                      (student.totalAttempts / maxAttemptsPerStudent) * 100;
+
+                    return (
+                      <div
+                        key={student.studentId}
+                        className="teacher-chart-row"
+                      >
+                        <span className="teacher-chart-label teacher-chart-label-student">
+                          {student.studentName}
+                        </span>
+                        <div className="teacher-chart-bar-track">
+                          <div
+                            className="teacher-chart-bar-fill teacher-chart-bar-fill-alt"
+                            style={{ width: `${widthPercent}%` }}
+                          />
+                        </div>
+                        <span className="teacher-chart-value">
+                          {student.totalAttempts}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </article>
+          </div>
         </div>
 
         <div className="panel p-6">

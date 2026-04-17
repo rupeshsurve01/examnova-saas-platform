@@ -584,6 +584,10 @@
     grid-template-columns: minmax(240px, 1.5fr) repeat(2, minmax(180px, 0.8fr));
     align-items: end;
   }
+
+  .teacher-chart-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (min-width: 900px) {
@@ -936,6 +940,75 @@
   margin-top: 18px;
   color: var(--muted);
   line-height: 1.6;
+}
+
+.teacher-chart-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.teacher-chart-card {
+  border: 1px solid #d9e5f7;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(47, 111, 237, 0.08), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+  padding: 18px;
+}
+
+.teacher-chart-title {
+  font-size: 1.05rem;
+}
+
+.teacher-chart-bars {
+  display: grid;
+  gap: 12px;
+}
+
+.teacher-chart-row {
+  display: grid;
+  align-items: center;
+  gap: 10px;
+  grid-template-columns: minmax(72px, auto) 1fr 44px;
+}
+
+.teacher-chart-label {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.teacher-chart-label-student {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teacher-chart-bar-track {
+  position: relative;
+  overflow: hidden;
+  height: 12px;
+  border: 1px solid #d7e4fb;
+  border-radius: 999px;
+  background: #eef4ff;
+}
+
+.teacher-chart-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2f6fed 0%, #74a0ff 100%);
+}
+
+.teacher-chart-bar-fill-alt {
+  background: linear-gradient(90deg, #1f57c8 0%, #2f6fed 100%);
+}
+
+.teacher-chart-value {
+  text-align: right;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .student-layout {
