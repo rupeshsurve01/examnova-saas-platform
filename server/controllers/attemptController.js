@@ -3,7 +3,7 @@ const Exam = require("../models/Exam");
 const Question = require("../models/Question");
 const StudentWorkspaceAccess = require("../models/StudentWorkspaceAccess");
 const { getIo } = require("../socket");
-const { resultExportQueue } = require("../queues/resultExportQueue");
+const { getResultExportQueue } = require("../queues/resultExportQueue");
 
 const getStudentResult = async (req, res) => {
   try {
@@ -295,6 +295,7 @@ const queueExamResultsExport = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized to export results" });
     }
 
+    const resultExportQueue = getResultExportQueue();
     const job = await resultExportQueue.add("generate-exam-results-export", {
       examId: exam._id.toString(),
       examTitle: exam.title,
@@ -309,6 +310,12 @@ const queueExamResultsExport = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    if (error.code === "ECONNREFUSED") {
+      return res.status(503).json({
+        message: "Redis is not running. Start Redis before using background exports.",
+      });
+    }
+
     return res.status(500).json({ message: "Unable to queue results export" });
   }
 };
@@ -321,6 +328,7 @@ const getExamResultsExportJobStatus = async (req, res) => {
       return res.status(400).json({ message: "Job Id Required" });
     }
 
+    const resultExportQueue = getResultExportQueue();
     const job = await resultExportQueue.getJob(jobId);
 
     if (!job) {
@@ -347,6 +355,12 @@ const getExamResultsExportJobStatus = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    if (error.code === "ECONNREFUSED") {
+      return res.status(503).json({
+        message: "Redis is not running. Start Redis before checking export jobs.",
+      });
+    }
+
     return res.status(500).json({ message: "Unable to load export job status" });
   }
 };
