@@ -27,7 +27,9 @@ const {
   getStudentResult,
   getExamAttempts,
   startExam,
-  getStudentExamAttempt
+  getStudentExamAttempt,
+  queueExamResultsExport,
+  getExamResultsExportJobStatus,
 } = require("../controllers/attemptController");
 
 const router = express.Router();
@@ -66,6 +68,8 @@ router.delete("/questions/:questionId", protect, authorize("teacher", "org_admin
 
 // ---------- RESULTS ----------
 router.get("/attempts/:attemptId/result", protect, getStudentResult);
+router.get("/exports/jobs/:jobId", protect, authorize("teacher", "org_admin"), getExamResultsExportJobStatus);
 router.get("/:examId/attempts", protect, authorize("teacher", "org_admin"), getExamAttempts);
+router.post("/:examId/attempts/export", protect, authorize("teacher", "org_admin"), queueExamResultsExport);
 
 module.exports = router;

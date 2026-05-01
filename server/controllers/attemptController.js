@@ -3,6 +3,7 @@ const Exam = require("../models/Exam");
 const Question = require("../models/Question");
 const StudentWorkspaceAccess = require("../models/StudentWorkspaceAccess");
 const { getIo } = require("../socket");
+const { resultExportQueue } = require("../queues/resultExportQueue");
 
 const getStudentResult = async (req, res) => {
   try {
@@ -273,10 +274,89 @@ const getStudentExamAttempt = async (req, res) => {
   }
 };
 
+const queueExamResultsExport = async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    if (!examId) {
+      return res.status(400).json({ message: "Exam Id Required" });
+    }
+
+    const exam = await Exam.findById(examId).select("title createdBy");
+
+    if (!exam) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
+
+    const isOrgAdmin = req.user.role === "org_admin";
+    const isOwner = exam.createdBy?.toString() === req.user._id.toString();
+
+    if (!isOrgAdmin && !isOwner) {
+      return res.status(403).json({ message: "Unauthorized to export results" });
+    }
+
+    const job = await resultExportQueue.add("generate-exam-results-export", {
+      examId: exam._id.toString(),
+      examTitle: exam.title,
+      requestedBy: req.user._id.toString(),
+      requestedAt: new Date().toISOString(),
+    });
+
+    return res.status(202).json({
+      message: "Results export job queued successfully",
+      jobId: job.id,
+      status: "queued",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Unable to queue results export" });
+  }
+};
+
+const getExamResultsExportJobStatus = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    if (!jobId) {
+      return res.status(400).json({ message: "Job Id Required" });
+    }
+
+    const job = await resultExportQueue.getJob(jobId);
+
+    if (!job) {
+      return res.status(404).json({ message: "Export job not found" });
+    }
+
+    if (job.data.requestedBy !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Unauthorized to view export job" });
+    }
+
+    const state = await job.getState();
+    const progress = job.progress || 0;
+    const result = job.returnvalue || null;
+    const failedReason = job.failedReason || null;
+
+    return res.status(200).json({
+      jobId: job.id,
+      state,
+      progress,
+      result,
+      failedReason,
+      createdAt: job.timestamp,
+      finishedAt: job.finishedOn || null,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Unable to load export job status" });
+  }
+};
+
 module.exports = {
   getStudentResult,
   getExamAttempts,
   getStudentAttempts,
   startExam,
   getStudentExamAttempt,
+  queueExamResultsExport,
+  getExamResultsExportJobStatus,
 };

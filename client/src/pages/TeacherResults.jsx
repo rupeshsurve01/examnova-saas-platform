@@ -11,9 +11,34 @@ const TeacherResults = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [studentSortBy, setStudentSortBy] = useState("bestScore");
   const [attemptFilter, setAttemptFilter] = useState("all");
+  const [exportJobId, setExportJobId] = useState("");
+  const [exportJobState, setExportJobState] = useState("");
+  const [exportMessage, setExportMessage] = useState("");
+  const [exportFilePath, setExportFilePath] = useState("");
+  const [isQueueingExport, setIsQueueingExport] = useState(false);
 
   const handlePrintResults = () => {
     window.print();
+  };
+
+  const handleQueueResultsExport = async () => {
+    try {
+      setIsQueueingExport(true);
+      setExportMessage("");
+      setExportFilePath("");
+      const response = await API.post(`/exams/${examId}/attempts/export`);
+
+      setExportJobId(String(response.data.jobId));
+      setExportJobState(response.data.status || "queued");
+      setExportMessage("Background export job queued. The worker will process it shortly.");
+    } catch (error) {
+      setExportMessage(
+        error.response?.data?.message || "Unable to queue background export.",
+      );
+      setExportJobState("failed");
+    } finally {
+      setIsQueueingExport(false);
+    }
   };
 
   const fetchResults = async () => {
@@ -32,6 +57,58 @@ const TeacherResults = () => {
   useEffect(() => {
     fetchResults();
   }, [examId]);
+
+  useEffect(() => {
+    if (!exportJobId) {
+      return undefined;
+    }
+
+    let intervalId = null;
+
+    const fetchExportStatus = async () => {
+      try {
+        const response = await API.get(`/exams/exports/jobs/${exportJobId}`);
+        const nextState = response.data.state || "unknown";
+        setExportJobState(nextState);
+
+        if (response.data.result?.filePath) {
+          setExportFilePath(response.data.result.filePath);
+        }
+
+        if (nextState === "completed") {
+          setExportMessage("Background export finished successfully.");
+          if (intervalId) {
+            window.clearInterval(intervalId);
+          }
+        }
+
+        if (nextState === "failed") {
+          setExportMessage(
+            response.data.failedReason || "Background export failed.",
+          );
+          if (intervalId) {
+            window.clearInterval(intervalId);
+          }
+        }
+      } catch (error) {
+        setExportMessage(
+          error.response?.data?.message || "Unable to refresh export status.",
+        );
+        if (intervalId) {
+          window.clearInterval(intervalId);
+        }
+      }
+    };
+
+    fetchExportStatus();
+    intervalId = window.setInterval(fetchExportStatus, 3000);
+
+    return () => {
+      if (intervalId) {
+        window.clearInterval(intervalId);
+      }
+    };
+  }, [exportJobId]);
 
   const totalAttempts = attempts.length;
   const highestScore =
@@ -252,12 +329,34 @@ const TeacherResults = () => {
         <div className="teacher-results-actions no-print">
           <button
             type="button"
+            className="primary-button teacher-results-action-button"
+            onClick={handleQueueResultsExport}
+            disabled={isQueueingExport}
+          >
+            {isQueueingExport ? "Queueing Export..." : "Queue Background Export"}
+          </button>
+          <button
+            type="button"
             className="secondary-button teacher-results-action-button"
             onClick={handlePrintResults}
           >
             Print / Export Results
           </button>
         </div>
+
+        {exportMessage ? (
+          <div className="teacher-badge-card no-print">
+            <p className="stat-label">Background Export</p>
+            <p className="teacher-badge-value">{exportJobState || "queued"}</p>
+            <p className="section-subtitle">{exportMessage}</p>
+            {exportJobId ? (
+              <p className="section-subtitle">Job ID: {exportJobId}</p>
+            ) : null}
+            {exportFilePath ? (
+              <p className="section-subtitle">Saved to: {exportFilePath}</p>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="teacher-badge-card">
           <p className="stat-label">Students Reached</p>
