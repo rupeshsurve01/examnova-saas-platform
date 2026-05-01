@@ -2,6 +2,7 @@ const Attempt = require("../models/Attempt");
 const Exam = require("../models/Exam");
 const Question = require("../models/Question");
 const StudentWorkspaceAccess = require("../models/StudentWorkspaceAccess");
+const { getIo } = require("../socket");
 
 const getStudentResult = async (req, res) => {
   try {
@@ -215,6 +216,21 @@ const startExam = async (req, res) => {
       attemptNumber: nextAttemptNumber,
       startedAt: new Date(),
     });
+    const studentName =
+      req.user.name || req.user.email || `Student ${req.user._id.toString()}`;
+    const io = getIo();
+
+    if (io) {
+      io.to(`teacher:${exam.createdBy.toString()}`).emit("student-started-exam", {
+        examId: exam._id.toString(),
+        examTitle: exam.title,
+        studentId: req.user._id.toString(),
+        studentName,
+        attemptId: attempt._id.toString(),
+        attemptNumber: attempt.attemptNumber,
+        startedAt: attempt.startedAt,
+      });
+    }
 
     res.status(201).json({
       message: "Exam started",

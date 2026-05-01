@@ -3,6 +3,7 @@ const Question = require("../models/Question");
 const Exam = require("../models/Exam");
 const User = require("../models/User");
 const StudentWorkspaceAccess = require("../models/StudentWorkspaceAccess");
+const { getIo } = require("../socket");
 
 const generateWorkspaceCode = () =>
   `TCH-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
@@ -391,6 +392,23 @@ const submitExam = async (req, res) => {
     attempt.submittedAt = new Date();
 
     await attempt.save();
+    const student = await User.findById(studentId).select("name email");
+    const studentName =
+      student?.name || student?.email || `Student ${studentId.toString()}`;
+    const io = getIo();
+
+    if (io) {
+      io.to(`teacher:${exam.createdBy.toString()}`).emit("student-submitted-exam", {
+        examId: exam._id.toString(),
+        examTitle: exam.title,
+        studentId: studentId.toString(),
+        studentName,
+        attemptId: attempt._id.toString(),
+        attemptNumber: attempt.attemptNumber,
+        score,
+        submittedAt: attempt.submittedAt,
+      });
+    }
 
     res.status(200).json({
       message: "Exam submitted successfully",

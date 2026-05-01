@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { socket } from "../socket";
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
@@ -54,6 +55,42 @@ const TeacherDashboard = () => {
   useEffect(() => {
     fetchTeacherExams();
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || (user.role !== "teacher" && user.role !== "org_admin")) {
+      return undefined;
+    }
+
+    const handleConnect = () => {
+      console.log("Connected to socket server:", socket.id);
+      socket.emit("join-teacher-room", user.id);
+    };
+
+    const handleStudentStartedExam = (payload) => {
+      console.log("Live update: student started exam", payload);
+    };
+
+    const handleStudentSubmittedExam = (payload) => {
+      console.log("Live update: student submitted exam", payload);
+    };
+
+    if (!socket.connected) {
+      socket.connect();
+    } else {
+      socket.emit("join-teacher-room", user.id);
+    }
+
+    socket.on("connect", handleConnect);
+    socket.on("student-started-exam", handleStudentStartedExam);
+    socket.on("student-submitted-exam", handleStudentSubmittedExam);
+
+    return () => {
+      socket.off("connect", handleConnect);
+      socket.off("student-started-exam", handleStudentStartedExam);
+      socket.off("student-submitted-exam", handleStudentSubmittedExam);
+      socket.disconnect();
+    };
+  }, [user?.id, user?.role]);
 
   const handleCreateExam = () => {
     navigate("/exams");
