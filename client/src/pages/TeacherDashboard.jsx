@@ -34,8 +34,12 @@ const TeacherDashboard = () => {
     try {
       setLoading(true);
       setErrorMessage("");
-      const workspaceResponse = await API.get("/exams/workspace/code");
-      setWorkspaceCode(workspaceResponse.data.workspaceCode || "");
+      if (user?.role === "teacher") {
+        const workspaceResponse = await API.get("/exams/workspace/code");
+        setWorkspaceCode(workspaceResponse.data.workspaceCode || "");
+      } else {
+        setWorkspaceCode("");
+      }
 
       const examsResponse = await API.get(`/exams/teacher/${user.id}`);
       setExams(examsResponse.data);
@@ -54,7 +58,7 @@ const TeacherDashboard = () => {
 
   useEffect(() => {
     fetchTeacherExams();
-  }, [user?.id]);
+  }, [user?.id, user?.role]);
 
   useEffect(() => {
     if (!user?.id || (user.role !== "teacher" && user.role !== "org_admin")) {
