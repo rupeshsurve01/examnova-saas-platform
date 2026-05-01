@@ -2,6 +2,7 @@ const fs = require("fs/promises");
 const path = require("path");
 const Attempt = require("../models/Attempt");
 const Exam = require("../models/Exam");
+require("../models/User");
 
 const buildExamExportPayload = async (examId) => {
   const exam = await Exam.findById(examId)
