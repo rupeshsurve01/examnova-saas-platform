@@ -8,6 +8,7 @@ const TeacherDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [exams, setExams] = useState([]);
+  const [liveActivities, setLiveActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [editingRetakeExamId, setEditingRetakeExamId] = useState(null);
@@ -23,6 +24,27 @@ const TeacherDashboard = () => {
   const [publishFilter, setPublishFilter] = useState("all");
   const [retakeFilter, setRetakeFilter] = useState("all");
   const [attemptFilter, setAttemptFilter] = useState("all");
+
+  const addLiveActivity = (activity) => {
+    setLiveActivities((currentActivities) => [activity, ...currentActivities].slice(0, 6));
+  };
+
+  const formatActivityTime = (value) => {
+    if (!value) {
+      return "Just now";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "Just now";
+    }
+
+    return date.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  };
 
   const fetchTeacherExams = async () => {
     if (!user?.id) {
@@ -71,11 +93,23 @@ const TeacherDashboard = () => {
     };
 
     const handleStudentStartedExam = (payload) => {
-      console.log("Live update: student started exam", payload);
+      addLiveActivity({
+        id: `${payload.attemptId}-started`,
+        type: "started",
+        title: `${payload.studentName} started ${payload.examTitle}`,
+        detail: `Attempt ${payload.attemptNumber}`,
+        time: payload.startedAt,
+      });
     };
 
     const handleStudentSubmittedExam = (payload) => {
-      console.log("Live update: student submitted exam", payload);
+      addLiveActivity({
+        id: `${payload.attemptId}-submitted`,
+        type: "submitted",
+        title: `${payload.studentName} submitted ${payload.examTitle}`,
+        detail: `Score: ${payload.score}`,
+        time: payload.submittedAt,
+      });
     };
 
     if (!socket.connected) {
@@ -319,6 +353,47 @@ const TeacherDashboard = () => {
             <p className="stat-value font-mono text-slate-500">{recentExamCode}</p>
           </div>
         </div>
+      </section>
+
+      <section className="panel teacher-live-activity-card p-6">
+        <div className="teacher-live-activity-header">
+          <div>
+            <p className="teacher-live-activity-kicker">Live Activity</p>
+            <h2 className="section-title">Real-time student exam updates</h2>
+            <p className="section-subtitle">
+              New start and submit events appear here as students interact with your exams.
+            </p>
+          </div>
+          <span className="teacher-live-status-pill">
+            <span className="teacher-live-status-dot" />
+            Live
+          </span>
+        </div>
+
+        {liveActivities.length === 0 ? (
+          <div className="teacher-live-activity-empty">
+            <p className="section-subtitle">
+              Waiting for students to start or submit an exam.
+            </p>
+          </div>
+        ) : (
+          <div className="teacher-live-activity-list">
+            {liveActivities.map((activity) => (
+              <article
+                key={activity.id}
+                className={`teacher-live-activity-item teacher-live-activity-item-${activity.type}`}
+              >
+                <div>
+                  <p className="teacher-live-activity-title">{activity.title}</p>
+                  <p className="teacher-live-activity-detail">{activity.detail}</p>
+                </div>
+                <time className="teacher-live-activity-time">
+                  {formatActivityTime(activity.time)}
+                </time>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="teacher-page-section">
