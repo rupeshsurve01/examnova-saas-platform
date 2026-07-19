@@ -5,7 +5,8 @@ import { useAuth } from "../context/AuthContext";
 
 function StudentDashboard() {
   const [exams, setExams] = useState([]);
-  const [workspaceCode, setWorkspaceCode] = useState("");
+  const DEMO_WORKSPACE_CODE = "TCH-KYFVD";
+  const [workspaceCode, setWorkspaceCode] = useState(DEMO_WORKSPACE_CODE);
   const [joiningWorkspace, setJoiningWorkspace] = useState(false);
   const [workspaceMessage, setWorkspaceMessage] = useState("");
   const [workspaceError, setWorkspaceError] = useState("");
@@ -168,18 +169,32 @@ function StudentDashboard() {
             onSubmit={handleJoinWorkspace}
             className="mt-5 grid gap-3 md:grid-cols-[1fr_auto]"
           >
-            <input
-              type="text"
-              className="form-input font-mono focus:ring-2 focus:ring-blue-500"
-              placeholder="Example: TCH-AB12C"
-              value={workspaceCode}
-              onChange={(event) => {
-                setWorkspaceCode(event.target.value.toUpperCase());
-                setWorkspaceError("");
-                setWorkspaceMessage("");
-              }}
-              disabled={joiningWorkspace}
-            />
+            <div className="student-workspace-code-input-wrap">
+              <input
+                type="text"
+                className="form-input font-mono focus:ring-2 focus:ring-blue-500"
+                placeholder="Example: TCH-AB12C"
+                value={workspaceCode}
+                onChange={(event) => {
+                  setWorkspaceCode(event.target.value.toUpperCase());
+                  setWorkspaceError("");
+                  setWorkspaceMessage("");
+                }}
+                disabled={joiningWorkspace}
+              />
+              <p className="workspace-helper">
+                Use this default demo workspace code:{" "}
+                <span
+                  className={
+                    workspaceCode === DEMO_WORKSPACE_CODE
+                      ? "workspace-helper-code"
+                      : "workspace-helper-code workspace-helper-code-muted"
+                  }
+                >
+                  {DEMO_WORKSPACE_CODE}
+                </span>
+              </p>
+            </div>
             <button
               type="submit"
               className="primary-button"

@@ -1,4 +1,29 @@
+
 @import "tailwindcss";
+
+/* StudentDashboard: Join Teacher Workspace demo code helper */
+.student-workspace-code-input-wrap {
+  display: grid;
+  gap: 6px;
+}
+
+.workspace-helper {
+  margin-top: 2px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.workspace-helper-code {
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.workspace-helper-code-muted {
+  font-weight: 800;
+  color: var(--muted);
+}
+
 
 :root {
   --bg: #eef3fb;
