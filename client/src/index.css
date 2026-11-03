@@ -1926,6 +1926,18 @@
   }
 }
 
+@media (min-width: 768px) and (max-width: 1199px) {
+  .teacher-dashboard-toolbar,
+  .teacher-results-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .teacher-dashboard-toolbar-search,
+  .teacher-results-toolbar-search {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (min-width: 900px) {
   .teacher-layout {
     grid-template-columns: 280px minmax(0, 1fr);
@@ -1970,6 +1982,37 @@
 
   .result-answer-summary {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1023px) {
+  .teacher-content {
+    min-width: 0;
+  }
+
+  .teacher-page-shell,
+  .teacher-page-section,
+  .teacher-page-section > *,
+  .teacher-page-shell > .teacher-hero {
+    min-width: 0;
+  }
+
+  .teacher-page-shell > .teacher-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .teacher-page-shell > .teacher-hero > *,
+  .teacher-page-shell > .teacher-hero .stats-grid,
+  .teacher-page-shell > .teacher-hero .stat-box {
+    min-width: 0;
+  }
+
+  .teacher-page-shell > .teacher-hero .stat-value {
+    overflow-wrap: anywhere;
+  }
+
+  .teacher-page-shell > .teacher-hero .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -2290,6 +2333,117 @@
   .question-action-button {
     width: 100%;
   }
+
+  .app-shell,
+  .teacher-content,
+  .student-content,
+  .teacher-page-shell,
+  .teacher-page-section,
+  .student-page-shell,
+  .student-page-section,
+  .panel,
+  .exam-card,
+  .question-shell,
+  .result-review-card {
+    min-width: 0;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat-box,
+  .teacher-badge-card,
+  .teacher-analytics-card,
+  .teacher-chart-card {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .meta-row {
+    display: grid;
+    grid-template-columns: minmax(88px, 0.7fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+  }
+
+  .meta-row strong {
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .teacher-mobile-menu-button,
+  .student-mobile-menu-button,
+  .student-nav-link,
+  .teacher-nav-link,
+  .student-filter-chip,
+  .result-action-button,
+  .question-action-button {
+    min-height: 44px;
+  }
+
+  .form-input,
+  textarea.form-input {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .option-card {
+    min-height: 56px;
+    align-items: flex-start;
+    overflow-wrap: anywhere;
+  }
+
+  .option-card input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+  }
+
+  .teacher-results-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .teacher-results-actions .teacher-results-action-button {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 12px;
+  }
+
+  .teacher-results-attempt-table {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .teacher-results-attempt-table td[data-label] {
+    overflow-wrap: anywhere;
+  }
+
+  .teacher-results-attempt-table td[data-label="Answer Review"] button {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .teacher-results-attempt-table td[colspan] {
+    display: block;
+  }
+
+  .teacher-results-attempt-table td[colspan] .panel {
+    min-width: 0;
+    padding: 14px;
+  }
+
+  .teacher-results-attempt-table .result-review-card {
+    padding: 16px;
+  }
+
+  .teacher-results-attempt-table .result-review-header {
+    min-width: 0;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2329,6 +2483,107 @@
 
   .student-filter-chip {
     flex-basis: 100%;
+  }
+
+  .teacher-content,
+  .student-content {
+    padding: 12px;
+  }
+
+  .teacher-content .panel,
+  .student-content .panel {
+    padding: 16px;
+  }
+
+  .teacher-results-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-results-attempt-table tbody,
+  .teacher-results-attempt-table tr,
+  .teacher-results-attempt-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .teacher-results-attempt-table {
+    display: block;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+  }
+
+  .teacher-results-attempt-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .teacher-results-attempt-table .teacher-results-attempt-row {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 8px 18px rgba(19, 38, 61, 0.05);
+  }
+
+  .teacher-results-attempt-table .teacher-results-review-row > td {
+    display: block;
+  }
+
+  .teacher-results-attempt-table td[data-label] {
+    display: grid;
+    grid-template-columns: minmax(92px, 0.38fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    padding: 12px;
+    text-align: left;
+  }
+
+  .teacher-results-attempt-table td[data-label]::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+
+  .teacher-results-attempt-table td[data-label="Answer Review"] {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-results-attempt-table td[data-label="Answer Review"]::before {
+    display: none;
+  }
+
+  .teacher-results-attempt-table td[data-label="Answer Review"] button {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .teacher-results-attempt-table td[colspan] {
+    border: 0;
+    padding: 0;
+  }
+
+  .teacher-results-attempt-table td[colspan] .panel {
+    padding: 14px;
+  }
+
+  .teacher-results-attempt-table .result-review-card {
+    padding: 14px;
+  }
+
+  .teacher-results-attempt-table .result-review-header {
+    flex-direction: column;
   }
 }
 

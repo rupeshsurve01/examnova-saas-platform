@@ -36,6 +36,8 @@ function TeacherLayout() {
           className="teacher-mobile-menu-button"
           onClick={() => setIsSidebarOpen((current) => !current)}
           aria-label="Toggle teacher navigation"
+          aria-expanded={isSidebarOpen}
+          aria-controls="teacher-navigation"
         >
           {isSidebarOpen ? "Close" : "Menu"}
         </button>
@@ -50,7 +52,10 @@ function TeacherLayout() {
         />
       ) : null}
 
-      <aside className={`teacher-sidebar ${isSidebarOpen ? "teacher-sidebar-open" : ""}`}>
+      <aside
+        id="teacher-navigation"
+        className={`teacher-sidebar ${isSidebarOpen ? "teacher-sidebar-open" : ""}`}
+      >
         <div className="teacher-sidebar-header">
           <div className="brand">ExamNova</div>
           <p className="teacher-sidebar-subtitle">Teacher control center</p>

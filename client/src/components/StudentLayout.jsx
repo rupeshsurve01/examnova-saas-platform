@@ -25,11 +25,16 @@ function StudentLayout() {
           className="student-mobile-menu-button"
           onClick={() => setIsNavOpen((current) => !current)}
           aria-label="Toggle student navigation"
+          aria-expanded={isNavOpen}
+          aria-controls="student-navigation"
         >
           {isNavOpen ? "Close" : "Menu"}
         </button>
 
-        <nav className={`student-navbar-nav ${isNavOpen ? "student-navbar-nav-open" : ""}`}>
+        <nav
+          id="student-navigation"
+          className={`student-navbar-nav ${isNavOpen ? "student-navbar-nav-open" : ""}`}
+        >
           <NavLink
             to="/dashboard"
             end

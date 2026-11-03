@@ -692,7 +692,7 @@ const TeacherResults = () => {
             </div>
           ) : (
             <div className="mt-6 overflow-x-auto">
-              <table className="teacher-results-table">
+              <table className="teacher-results-table teacher-results-attempt-table">
                 <thead>
                   <tr>
                     <th>Attempt</th>
@@ -706,22 +706,28 @@ const TeacherResults = () => {
                 <tbody>
                   {filteredAttempts.map((attempt) => (
                     <Fragment key={attempt._id}>
-                      <tr>
-                        <td>Attempt #{attempt.attemptNumber || 1}</td>
-                        <td>
+                      <tr className="teacher-results-attempt-row">
+                        <td data-label="Attempt">
+                          Attempt #{attempt.attemptNumber || 1}
+                        </td>
+                        <td data-label="Student">
                           <div>{attempt.studentId?.name || "Unknown Student"}</div>
                           {attempt.studentId?.email ? (
                             <small>{attempt.studentId.email}</small>
                           ) : null}
                         </td>
-                        <td>{attempt.submittedAt ? "Submitted" : "In progress"}</td>
-                        <td>{attempt.submittedAt ? attempt.score ?? 0 : "—"}</td>
-                        <td>
+                        <td data-label="Status">
+                          {attempt.submittedAt ? "Submitted" : "In progress"}
+                        </td>
+                        <td data-label="Score">
+                          {attempt.submittedAt ? attempt.score ?? 0 : "—"}
+                        </td>
+                        <td data-label="Submitted">
                           {attempt.submittedAt
                             ? new Date(attempt.submittedAt).toLocaleString()
                             : "Not submitted yet"}
                         </td>
-                        <td>
+                        <td data-label="Answer Review">
                           <button
                             type="button"
                             className="secondary-button"
@@ -737,7 +743,7 @@ const TeacherResults = () => {
                         </td>
                       </tr>
                       {expandedAttemptId === attempt._id ? (
-                        <tr>
+                        <tr className="teacher-results-review-row">
                           <td colSpan={6}>
                             <div className="panel p-5">
                               <h3 className="section-title">
