@@ -144,8 +144,8 @@ function ResultPage() {
             <div>
               <h2 className="section-title">Answer Review</h2>
               <p className="section-subtitle">
-                See each question, your selected answer, and the correct
-                answer.
+                See each question, your selected answer, and whether it was
+                correct.
               </p>
             </div>
             <div className="result-summary-actions no-print">
@@ -173,9 +173,6 @@ function ResultPage() {
                   ? optionLabels[question.selectedOption] ||
                     `Option ${question.selectedOption + 1}`
                   : "Not Answered";
-              const correctLabel =
-                optionLabels[question.correctAnswer] ||
-                `Option ${question.correctAnswer + 1}`;
               const statusText =
                 question.selectedOption === null ||
                 question.selectedOption === undefined
@@ -222,17 +219,12 @@ function ResultPage() {
                   <div className="result-options-list">
                     {question.options.map((option, index) => {
                       const isSelected = question.selectedOption === index;
-                      const isCorrect = question.correctAnswer === index;
 
                       return (
                         <div
                           key={`${question.questionId}-${index}`}
                           className={`result-option-card ${
-                            isCorrect
-                              ? "result-option-card-correct"
-                              : isSelected
-                                ? "result-option-card-selected"
-                                : ""
+                            isSelected ? "result-option-card-selected" : ""
                           }`}
                         >
                           <span className="option-badge">
@@ -244,11 +236,6 @@ function ResultPage() {
                               {isSelected && (
                                 <span className="result-option-tag result-option-tag-selected">
                                   Your Answer
-                                </span>
-                              )}
-                              {isCorrect && (
-                                <span className="result-option-tag result-option-tag-correct">
-                                  Correct Answer
                                 </span>
                               )}
                             </div>
@@ -264,12 +251,14 @@ function ResultPage() {
                       <p className="result-answer-value">{selectedLabel}</p>
                     </div>
                     <div className="stat-box student-stat-box">
-                      <p className="stat-label">Correct Answer</p>
-                      <p className="result-answer-value">{correctLabel}</p>
+                      <p className="stat-label">Result</p>
+                      <p className="result-answer-value">{statusText}</p>
                     </div>
                     <div className="stat-box student-stat-box">
                       <p className="stat-label">Marks</p>
-                      <p className="result-answer-value">{question.marks}</p>
+                      <p className="result-answer-value">
+                        {question.earnedMarks ?? 0} / {question.marks}
+                      </p>
                     </div>
                   </div>
                 </article>

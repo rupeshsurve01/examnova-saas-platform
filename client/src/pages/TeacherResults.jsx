@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import API from "../services/api";
 
@@ -16,6 +16,11 @@ const TeacherResults = () => {
   const [exportMessage, setExportMessage] = useState("");
   const [exportFilePath, setExportFilePath] = useState("");
   const [isQueueingExport, setIsQueueingExport] = useState(false);
+  const [refreshingResults, setRefreshingResults] = useState(false);
+  const [expandedAttemptId, setExpandedAttemptId] = useState(null);
+  const [attemptReviews, setAttemptReviews] = useState({});
+  const [reviewLoadingAttemptId, setReviewLoadingAttemptId] = useState(null);
+  const [reviewErrors, setReviewErrors] = useState({});
 
   const handlePrintResults = () => {
     window.print();
@@ -41,22 +46,67 @@ const TeacherResults = () => {
     }
   };
 
-  const fetchResults = async () => {
+  const fetchResults = useCallback(
+    async (refresh = false) => {
+      try {
+        if (refresh) {
+          setRefreshingResults(true);
+        }
+        setErrorMessage("");
+        const response = await API.get(`/exams/${examId}/attempts`);
+        setAttempts(response.data || []);
+      } catch (error) {
+        const message =
+          error.response?.data?.message || "Unable to load results.";
+        setErrorMessage(message);
+      } finally {
+        setLoading(false);
+        setRefreshingResults(false);
+      }
+    },
+    [examId],
+  );
+
+  const handleReviewAttempt = async (attemptId) => {
+    if (expandedAttemptId === attemptId) {
+      setExpandedAttemptId(null);
+      return;
+    }
+
+    setExpandedAttemptId(attemptId);
+    if (attemptReviews[attemptId]) {
+      return;
+    }
+
+    setReviewLoadingAttemptId(attemptId);
+    setReviewErrors((currentErrors) => {
+      const remainingErrors = { ...currentErrors };
+      delete remainingErrors[attemptId];
+      return remainingErrors;
+    });
+
     try {
-      const response = await API.get(`/exams/${examId}/attempts`);
-      setAttempts(response.data || []);
+      const response = await API.get(
+        `/exams/${examId}/attempts/${attemptId}/review`,
+      );
+      setAttemptReviews((currentReviews) => ({
+        ...currentReviews,
+        [attemptId]: response.data,
+      }));
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Unable to load results.";
-      setErrorMessage(message);
+      setReviewErrors((currentErrors) => ({
+        ...currentErrors,
+        [attemptId]:
+          error.response?.data?.message || "Unable to load this attempt review.",
+      }));
     } finally {
-      setLoading(false);
+      setReviewLoadingAttemptId(null);
     }
   };
 
   useEffect(() => {
     fetchResults();
-  }, [examId]);
+  }, [fetchResults]);
 
   useEffect(() => {
     if (!exportJobId) {
@@ -110,52 +160,56 @@ const TeacherResults = () => {
     };
   }, [exportJobId]);
 
+  const submittedAttempts = attempts.filter((attempt) => attempt.submittedAt);
   const totalAttempts = attempts.length;
   const highestScore =
-    attempts.length > 0
-      ? Math.max(...attempts.map((attempt) => Number(attempt.score) || 0))
+    submittedAttempts.length > 0
+      ? Math.max(...submittedAttempts.map((attempt) => Number(attempt.score) || 0))
       : 0;
   const averageScore =
-    attempts.length > 0
+    submittedAttempts.length > 0
       ? (
-          attempts.reduce(
+          submittedAttempts.reduce(
             (sum, attempt) => sum + (Number(attempt.score) || 0),
             0,
-          ) / attempts.length
+          ) / submittedAttempts.length
         ).toFixed(1)
       : "0.0";
-  const latestSubmission = attempts.reduce((latest, attempt) => {
-    if (!attempt.submittedAt) {
-      return latest;
-    }
-
-    const submittedTime = new Date(attempt.submittedAt).getTime();
-    return submittedTime > latest ? submittedTime : latest;
-  }, 0);
+  const latestSubmission = submittedAttempts.reduce(
+    (latest, attempt) => {
+      const submittedTime = new Date(attempt.submittedAt).getTime();
+      return submittedTime > latest ? submittedTime : latest;
+    },
+    0,
+  );
   const studentAnalytics = Object.values(
     attempts.reduce((analytics, attempt) => {
       const studentId = attempt.studentId?._id || `unknown-${attempt._id}`;
       const studentName = attempt.studentId?.name || "Unknown Student";
-      const score = Number(attempt.score) || 0;
-      const submittedTime = attempt.submittedAt
-        ? new Date(attempt.submittedAt).getTime()
-        : 0;
 
       if (!analytics[studentId]) {
         analytics[studentId] = {
           studentId,
           studentName,
           totalAttempts: 0,
-          bestScore: score,
-          latestScore: score,
-          latestAttemptId: attempt._id,
+          submittedAttempts: 0,
+          bestScore: 0,
+          latestScore: null,
+          latestAttemptId: null,
           averageScoreTotal: 0,
-          latestSubmittedAt: attempt.submittedAt || null,
-          latestSubmittedTime: submittedTime,
+          latestSubmittedAt: null,
+          latestSubmittedTime: 0,
         };
       }
 
       analytics[studentId].totalAttempts += 1;
+      if (!attempt.submittedAt) {
+        return analytics;
+      }
+
+      const score = Number(attempt.score) || 0;
+      const submittedTime = new Date(attempt.submittedAt).getTime();
+      analytics[studentId].submittedAttempts += 1;
       analytics[studentId].bestScore = Math.max(
         analytics[studentId].bestScore,
         score,
@@ -164,7 +218,7 @@ const TeacherResults = () => {
 
       if (submittedTime >= analytics[studentId].latestSubmittedTime) {
         analytics[studentId].latestSubmittedTime = submittedTime;
-        analytics[studentId].latestSubmittedAt = attempt.submittedAt || null;
+        analytics[studentId].latestSubmittedAt = attempt.submittedAt;
         analytics[studentId].latestScore = score;
         analytics[studentId].latestAttemptId = attempt._id;
       }
@@ -174,9 +228,9 @@ const TeacherResults = () => {
   )
     .map((student) => ({
       ...student,
-      averageScore: (student.averageScoreTotal / student.totalAttempts).toFixed(
-        1,
-      ),
+      averageScore: student.submittedAttempts
+        ? (student.averageScoreTotal / student.submittedAttempts).toFixed(1)
+        : "—",
     }))
     .sort((first, second) => first.studentName.localeCompare(second.studentName));
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
@@ -189,7 +243,8 @@ const TeacherResults = () => {
     .sort((first, second) => {
       if (studentSortBy === "averageScore") {
         const averageDelta =
-          Number(second.averageScore) - Number(first.averageScore);
+          (Number(second.averageScore) || 0) -
+          (Number(first.averageScore) || 0);
         if (averageDelta !== 0) {
           return averageDelta;
         }
@@ -239,6 +294,9 @@ const TeacherResults = () => {
 
     return true;
   });
+  const submittedFilteredAttempts = filteredAttempts.filter(
+    (attempt) => attempt.submittedAt,
+  );
   const scoreDistribution = [
     { label: "0 - 25", min: 0, max: 25, count: 0 },
     { label: "26 - 50", min: 26, max: 50, count: 0 },
@@ -247,7 +305,7 @@ const TeacherResults = () => {
     { label: "100+", min: 101, max: Number.POSITIVE_INFINITY, count: 0 },
   ].map((bucket) => ({
     ...bucket,
-    count: filteredAttempts.filter((attempt) => {
+    count: submittedFilteredAttempts.filter((attempt) => {
       const score = Number(attempt.score) || 0;
       return score >= bucket.min && score <= bucket.max;
     }).length,
@@ -329,6 +387,14 @@ const TeacherResults = () => {
         <div className="teacher-results-actions no-print">
           <button
             type="button"
+            className="secondary-button teacher-results-action-button"
+            onClick={() => fetchResults(true)}
+            disabled={refreshingResults}
+          >
+            {refreshingResults ? "Refreshing..." : "Refresh Results"}
+          </button>
+          <button
+            type="button"
             className="primary-button teacher-results-action-button"
             onClick={handleQueueResultsExport}
             disabled={isQueueingExport}
@@ -373,11 +439,15 @@ const TeacherResults = () => {
           </div>
           <div className="stat-box teacher-stat-box">
             <p className="stat-label">Highest Score</p>
-            <p className="stat-value">{highestScore}</p>
+            <p className="stat-value">
+              {submittedAttempts.length ? highestScore : "—"}
+            </p>
           </div>
           <div className="stat-box teacher-stat-box">
             <p className="stat-label">Average Score</p>
-            <p className="stat-value">{averageScore}</p>
+            <p className="stat-value">
+              {submittedAttempts.length ? averageScore : "—"}
+            </p>
           </div>
           <div className="stat-box teacher-stat-box">
             <p className="stat-label">Latest Submission</p>
@@ -443,8 +513,8 @@ const TeacherResults = () => {
 
           <p className="teacher-results-toolbar-summary">
             Showing {filteredStudentAnalytics.length} students and{" "}
-            {filteredAttempts.length} attempts from {attempts.length} recorded
-            attempts.
+            {filteredAttempts.length} attempts ({submittedFilteredAttempts.length}{" "}
+            submitted) from {attempts.length} recorded attempts.
           </p>
         </div>
 
@@ -569,7 +639,8 @@ const TeacherResults = () => {
                     </div>
 
                     <span className="teacher-analytics-pill">
-                      Best {student.bestScore}
+                      Best{" "}
+                      {student.submittedAttempts ? student.bestScore : "—"}
                     </span>
                   </div>
 
@@ -577,7 +648,7 @@ const TeacherResults = () => {
                     <div className="teacher-analytics-metric">
                       <span className="stat-label">Latest Score</span>
                       <span className="teacher-analytics-metric-value">
-                        {student.latestScore}
+                        {student.latestScore ?? "—"}
                       </span>
                     </div>
                     <div className="teacher-analytics-metric">
@@ -614,7 +685,9 @@ const TeacherResults = () => {
             <div className="panel teacher-empty-state mt-6 p-8 text-center">
               <h3 className="section-title">No matching attempts</h3>
               <p className="section-subtitle">
-                Adjust the filter or search to see more attempt records.
+                {attempts.length === 0
+                  ? "Student attempts will appear here when they start this exam."
+                  : "Adjust the filter or search to see more attempt records."}
               </p>
             </div>
           ) : (
@@ -624,22 +697,215 @@ const TeacherResults = () => {
                   <tr>
                     <th>Attempt</th>
                     <th>Student Name</th>
+                    <th>Status</th>
                     <th>Score</th>
                     <th>Submitted At</th>
+                    <th>Answer Review</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredAttempts.map((attempt) => (
-                    <tr key={attempt._id}>
-                      <td>Attempt #{attempt.attemptNumber || 1}</td>
-                      <td>{attempt.studentId?.name || "Unknown Student"}</td>
-                      <td>{attempt.score ?? 0}</td>
-                      <td>
-                        {attempt.submittedAt
-                          ? new Date(attempt.submittedAt).toLocaleString()
-                          : "Not submitted yet"}
-                      </td>
-                    </tr>
+                    <Fragment key={attempt._id}>
+                      <tr>
+                        <td>Attempt #{attempt.attemptNumber || 1}</td>
+                        <td>
+                          <div>{attempt.studentId?.name || "Unknown Student"}</div>
+                          {attempt.studentId?.email ? (
+                            <small>{attempt.studentId.email}</small>
+                          ) : null}
+                        </td>
+                        <td>{attempt.submittedAt ? "Submitted" : "In progress"}</td>
+                        <td>{attempt.submittedAt ? attempt.score ?? 0 : "—"}</td>
+                        <td>
+                          {attempt.submittedAt
+                            ? new Date(attempt.submittedAt).toLocaleString()
+                            : "Not submitted yet"}
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={() => handleReviewAttempt(attempt._id)}
+                            disabled={!attempt.submittedAt}
+                          >
+                            {expandedAttemptId === attempt._id
+                              ? "Hide review"
+                              : attempt.submittedAt
+                                ? "Review answers"
+                                : "Available after submission"}
+                          </button>
+                        </td>
+                      </tr>
+                      {expandedAttemptId === attempt._id ? (
+                        <tr>
+                          <td colSpan={6}>
+                            <div className="panel p-5">
+                              <h3 className="section-title">
+                                Answer review:{" "}
+                                {attempt.studentId?.name || "Unknown Student"}
+                              </h3>
+                              {reviewLoadingAttemptId === attempt._id ? (
+                                <p className="section-subtitle mt-3">
+                                  Loading submitted answers...
+                                </p>
+                              ) : null}
+                              {reviewErrors[attempt._id] ? (
+                                <p className="student-exam-note student-exam-note-blocked mt-3">
+                                  {reviewErrors[attempt._id]}
+                                </p>
+                              ) : null}
+                              {attemptReviews[attempt._id] ? (
+                                <>
+                                  <p className="section-subtitle mt-2">
+                                    Attempt #{attemptReviews[attempt._id].attemptNumber}{" "}
+                                    · Score {attemptReviews[attempt._id].score} /{" "}
+                                    {attemptReviews[attempt._id].totalMarks} ·
+                                    Submitted{" "}
+                                    {attemptReviews[attempt._id].submittedAt
+                                      ? new Date(
+                                          attemptReviews[attempt._id].submittedAt,
+                                        ).toLocaleString()
+                                      : "Not submitted"}
+                                  </p>
+                                  {attemptReviews[attempt._id].reviewQuestions
+                                    .length === 0 ? (
+                                    <p className="section-subtitle mt-4">
+                                      No questions are available for this exam.
+                                    </p>
+                                  ) : (
+                                    <div className="result-review-list mt-5">
+                                      {attemptReviews[
+                                        attempt._id
+                                      ].reviewQuestions.map((question) => {
+                                        const selectedLabel =
+                                          question.selectedOption !== null
+                                            ? `Option ${question.selectedOption + 1}`
+                                            : "Not answered";
+                                        const correctLabel = `Option ${
+                                          question.correctAnswer + 1
+                                        }`;
+
+                                        return (
+                                          <article
+                                            key={question.questionId}
+                                            className={`result-review-card ${
+                                              question.selectedOption === null
+                                                ? "result-review-card-unanswered"
+                                                : question.isCorrect
+                                                  ? "result-review-card-correct"
+                                                  : "result-review-card-incorrect"
+                                            }`}
+                                          >
+                                            <div className="result-review-header">
+                                              <div>
+                                                <p className="question-number">
+                                                  Question {question.questionNumber}
+                                                </p>
+                                                <h4 className="section-title mt-2">
+                                                  {question.questionText}
+                                                </h4>
+                                              </div>
+                                              <span
+                                                className={`result-status-pill ${
+                                                  question.selectedOption === null
+                                                    ? "result-status-pill-unanswered"
+                                                    : question.isCorrect
+                                                      ? "result-status-pill-correct"
+                                                      : "result-status-pill-incorrect"
+                                                }`}
+                                              >
+                                                {question.selectedOption === null
+                                                  ? "Not answered"
+                                                  : question.isCorrect
+                                                    ? "Correct"
+                                                    : "Incorrect"}
+                                              </span>
+                                            </div>
+                                            <div className="result-options-list">
+                                              {question.options.map(
+                                                (option, index) => {
+                                                  const isSelected =
+                                                    question.selectedOption ===
+                                                    index;
+                                                  const isCorrect =
+                                                    question.correctAnswer ===
+                                                    index;
+
+                                                  return (
+                                                    <div
+                                                      key={`${question.questionId}-${index}`}
+                                                      className={`result-option-card ${
+                                                        isCorrect
+                                                          ? "result-option-card-correct"
+                                                          : isSelected
+                                                            ? "result-option-card-selected"
+                                                            : ""
+                                                      }`}
+                                                    >
+                                                      <span className="option-badge">
+                                                        {String.fromCharCode(
+                                                          65 + index,
+                                                        )}
+                                                      </span>
+                                                      <div className="result-option-copy">
+                                                        <p>{option}</p>
+                                                        <div className="result-option-tags">
+                                                          {isSelected ? (
+                                                            <span className="result-option-tag result-option-tag-selected">
+                                                              Student answer
+                                                            </span>
+                                                          ) : null}
+                                                          {isCorrect ? (
+                                                            <span className="result-option-tag result-option-tag-correct">
+                                                              Correct answer
+                                                            </span>
+                                                          ) : null}
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  );
+                                                },
+                                              )}
+                                            </div>
+                                            <div className="result-answer-summary">
+                                              <div className="stat-box teacher-stat-box">
+                                                <p className="stat-label">
+                                                  Student Answer
+                                                </p>
+                                                <p className="result-answer-value">
+                                                  {selectedLabel}
+                                                </p>
+                                              </div>
+                                              <div className="stat-box teacher-stat-box">
+                                                <p className="stat-label">
+                                                  Correct Answer
+                                                </p>
+                                                <p className="result-answer-value">
+                                                  {correctLabel}
+                                                </p>
+                                              </div>
+                                              <div className="stat-box teacher-stat-box">
+                                                <p className="stat-label">
+                                                  Marks Earned
+                                                </p>
+                                                <p className="result-answer-value">
+                                                  {question.earnedMarks} /{" "}
+                                                  {question.marks}
+                                                </p>
+                                              </div>
+                                            </div>
+                                          </article>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </>
+                              ) : null}
+                            </div>
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>

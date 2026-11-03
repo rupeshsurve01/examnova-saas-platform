@@ -88,7 +88,6 @@ const TeacherDashboard = () => {
     }
 
     const handleConnect = () => {
-      console.log("Connected to socket server:", socket.id);
       socket.emit("join-teacher-room", user.id);
     };
 

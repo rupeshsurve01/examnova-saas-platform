@@ -32,16 +32,9 @@ const io = new Server(server, {
 setIo(io);
 
 io.on("connection", (socket) => {
-  console.log("Socket connected:", socket.id);
-
   socket.on("join-teacher-room", (teacherId) => {
     const roomName = `teacher:${teacherId}`;
     socket.join(roomName);
-    console.log(`Teacher joined room: ${roomName}`);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("Socket disconnected:", socket.id);
   });
 });
 
@@ -62,6 +55,4 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+server.listen(PORT);

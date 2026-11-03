@@ -32,17 +32,9 @@ const worker = new Worker(
   },
 );
 
-worker.on("completed", (job, result) => {
-  console.log(
-    `Export job ${job.id} completed for exam ${job.data.examId}: ${result.filePath}`,
-  );
-});
-
 worker.on("failed", (job, error) => {
   console.error(
     `Export job ${job?.id || "unknown"} failed for exam ${job?.data?.examId || "unknown"}:`,
     error.message,
   );
 });
-
-console.log("Result export worker is running...");

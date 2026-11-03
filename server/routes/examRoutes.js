@@ -26,6 +26,7 @@ const {
 const {
   getStudentResult,
   getExamAttempts,
+  getTeacherAttemptReview,
   startExam,
   getStudentExamAttempt,
   queueExamResultsExport,
@@ -67,7 +68,13 @@ router.put("/questions/:questionId", protect, authorize("teacher", "org_admin"),
 router.delete("/questions/:questionId", protect, authorize("teacher", "org_admin"), deleteQuestion);
 
 // ---------- RESULTS ----------
-router.get("/attempts/:attemptId/result", protect, getStudentResult);
+router.get("/attempts/:attemptId/result", protect, authorize("student"), getStudentResult);
+router.get(
+  "/:examId/attempts/:attemptId/review",
+  protect,
+  authorize("teacher", "org_admin"),
+  getTeacherAttemptReview,
+);
 router.get("/exports/jobs/:jobId", protect, authorize("teacher", "org_admin"), getExamResultsExportJobStatus);
 router.get("/:examId/attempts", protect, authorize("teacher", "org_admin"), getExamAttempts);
 router.post("/:examId/attempts/export", protect, authorize("teacher", "org_admin"), queueExamResultsExport);

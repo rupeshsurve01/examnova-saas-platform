@@ -5,6 +5,16 @@ const StudentWorkspaceAccess = require("../models/StudentWorkspaceAccess");
 const { getIo } = require("../socket");
 const { getResultExportQueue } = require("../queues/resultExportQueue");
 
+const canViewExamResults = (exam, user) => {
+  const isOwner = exam.createdBy?.toString() === user._id.toString();
+  const isOrganizationAdmin =
+    user.role === "org_admin" &&
+    user.organizationId &&
+    exam.organizationId?.toString() === user.organizationId.toString();
+
+  return isOwner || isOrganizationAdmin;
+};
+
 const getStudentResult = async (req, res) => {
   try {
     const { attemptId } = req.params;
@@ -57,10 +67,10 @@ const getStudentResult = async (req, res) => {
         questionNumber: index + 1,
         questionText: question.questionText,
         options: question.options,
-        correctAnswer: question.correctAnswer,
         selectedOption,
         isCorrect,
         marks: question.marks,
+        earnedMarks: isCorrect ? question.marks : 0,
       };
     });
 
@@ -92,15 +102,24 @@ const getExamAttempts = async (req, res) => {
       return res.status(400).json({ message: "Exam Id Required" });
     }
 
-    const attempts = await Attempt.find({ examId })
-      .populate("studentId")
-      .sort({ attemptNumber: -1, createdAt: -1 });
+    const exam = await Exam.findById(examId).select(
+      "createdBy organizationId",
+    );
 
-    if (attempts.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No attempts found for this exam" });
+    if (!exam) {
+      return res.status(404).json({ message: "Exam not found" });
     }
+
+    if (!canViewExamResults(exam, req.user)) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to view results for this exam" });
+    }
+
+    const attempts = await Attempt.find({ examId })
+      .select("-answers")
+      .populate({ path: "studentId", select: "name email" })
+      .sort({ attemptNumber: -1, createdAt: -1 });
 
     res.status(200).json(attempts);
   } catch (error) {
@@ -109,10 +128,84 @@ const getExamAttempts = async (req, res) => {
   }
 };
 
+const getTeacherAttemptReview = async (req, res) => {
+  try {
+    const { examId, attemptId } = req.params;
+    const exam = await Exam.findById(examId).select(
+      "title examCode duration totalMarks createdBy organizationId",
+    );
+
+    if (!exam) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
+
+    if (!canViewExamResults(exam, req.user)) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to view results for this exam" });
+    }
+
+    const attempt = await Attempt.findOne({ _id: attemptId, examId }).populate({
+      path: "studentId",
+      select: "name email",
+    });
+
+    if (!attempt) {
+      return res.status(404).json({ message: "Attempt not found" });
+    }
+
+    const questions = await Question.find({ examId }).sort({ createdAt: 1 });
+    const answersByQuestionId = new Map(
+      attempt.answers.map((answer) => [
+        answer.questionId.toString(),
+        answer.selectedOption,
+      ]),
+    );
+    const reviewQuestions = questions.map((question, index) => {
+      const selectedOption = answersByQuestionId.has(question._id.toString())
+        ? answersByQuestionId.get(question._id.toString())
+        : null;
+      const isCorrect =
+        selectedOption !== null &&
+        selectedOption === question.correctAnswer;
+
+      return {
+        questionId: question._id,
+        questionNumber: index + 1,
+        questionText: question.questionText,
+        options: question.options,
+        correctAnswer: question.correctAnswer,
+        selectedOption,
+        isCorrect,
+        marks: question.marks,
+        earnedMarks: isCorrect ? question.marks : 0,
+      };
+    });
+
+    return res.status(200).json({
+      attemptId: attempt._id,
+      attemptNumber: attempt.attemptNumber,
+      examId: exam._id,
+      examTitle: exam.title,
+      examCode: exam.examCode,
+      duration: exam.duration,
+      totalMarks: exam.totalMarks,
+      student: attempt.studentId,
+      score: attempt.score,
+      startedAt: attempt.startedAt,
+      submittedAt: attempt.submittedAt,
+      totalQuestions: reviewQuestions.length,
+      reviewQuestions,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
 const getStudentAttempts = async (req, res) => {
   try {
-    const studentId =
-      req.user.role === "student" ? req.user._id : req.params.studentId;
+    const studentId = req.user._id;
 
     if (!studentId) {
       return res.status(400).json({ message: "Student ID required" });
@@ -282,16 +375,15 @@ const queueExamResultsExport = async (req, res) => {
       return res.status(400).json({ message: "Exam Id Required" });
     }
 
-    const exam = await Exam.findById(examId).select("title createdBy");
+    const exam = await Exam.findById(examId).select(
+      "title createdBy organizationId",
+    );
 
     if (!exam) {
       return res.status(404).json({ message: "Exam not found" });
     }
 
-    const isOrgAdmin = req.user.role === "org_admin";
-    const isOwner = exam.createdBy?.toString() === req.user._id.toString();
-
-    if (!isOrgAdmin && !isOwner) {
+    if (!canViewExamResults(exam, req.user)) {
       return res.status(403).json({ message: "Unauthorized to export results" });
     }
 
@@ -368,6 +460,7 @@ const getExamResultsExportJobStatus = async (req, res) => {
 module.exports = {
   getStudentResult,
   getExamAttempts,
+  getTeacherAttemptReview,
   getStudentAttempts,
   startExam,
   getStudentExamAttempt,
